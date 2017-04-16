@@ -87,7 +87,9 @@ namespace XArcade_XInput {
             KeyboardMappings.Clear();
 
             var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
-            var mapping = ser.DeserializeObject(System.IO.File.ReadAllText("C:\\Users\\mike\\Work\\XArcade XInput\\XArcade XInput\\mappings\\default.json")) as Dictionary<string, object>;
+            var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
+            var mappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "default.json" });
+            var mapping = ser.DeserializeObject(System.IO.File.ReadAllText(mappingPath)) as Dictionary<string, object>;
 
             foreach (var pair in mapping) {
                 System.Console.WriteLine($"Loadding mapping for {pair.Key} ...");

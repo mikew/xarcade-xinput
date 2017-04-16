@@ -67,4 +67,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="mappings\default.json" DestinationFolder="$(OutDir)mappings\" />
+  </Target>
 </Project>
