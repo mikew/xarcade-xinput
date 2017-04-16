@@ -1,18 +1,61 @@
 ﻿using ScpDriverInterface;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace XArcade_XInput {
+    public class IKeyboardActionToGamepad {
+        public int Index;
+        public virtual void Run (bool IsRelease = false) { }
+    }
+
+    public class KeyboardDownToButton : IKeyboardActionToGamepad {
+        public X360Buttons Button;
+
+        public override void Run (bool IsRelease = false) {
+            if (IsRelease) {
+                Program.Manager.ButtonUp(Index, Button);
+                return;
+            }
+
+            Program.Manager.ButtonDown(Index, Button);
+        }
+    }
+
+    public class KeyboardDownToAxis : IKeyboardActionToGamepad {
+        public int DownValue;
+        public int UpValue;
+        public X360Axis Axis;
+
+        override public void Run (bool IsRelease = false) {
+            if (IsRelease) {
+                Program.Manager.SetAxis(Index, Axis, UpValue);
+                return;
+            }
+
+            Program.Manager.SetAxis(Index, Axis, DownValue);
+        }
+    }
+
     class Program {
         static Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
-        static ControllerManager Manager;
+        static public ControllerManager Manager;
         static ScpBus Bus;
         static bool IsRunning = false;
+        static bool IsDebug = true;
 
         static void Main (string[] args) {
             KeyboardHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
             Manager = new ControllerManager();
             Bus = new ScpBus();
 
+            ParseMapping();
             Start();
+
+            for (var i = 0; i < args.Length; i++) {
+                if (args[i] == "--debug") {
+                    IsDebug = true;
+                }
+            }
 
             // See https://github.com/gmamaladze/globalmousekeyhook/issues/3#issuecomment-230909645
             System.Windows.Forms.ApplicationContext msgLoop = new System.Windows.Forms.ApplicationContext();
@@ -38,154 +81,134 @@ namespace XArcade_XInput {
             System.Console.WriteLine("Stopped.");
         }
 
+        static Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
+
+        static void ParseMapping () {
+            KeyboardMappings.Clear();
+
+            var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
+            var mapping = ser.DeserializeObject(System.IO.File.ReadAllText("C:\\Users\\mike\\Work\\XArcade XInput\\XArcade XInput\\mappings\\default.json")) as Dictionary<string, object>;
+
+            foreach (var pair in mapping) {
+                System.Console.WriteLine($"Loadding mapping for {pair.Key} ...");
+
+                var shorthand = pair.Value as object[];
+                var controllerIndex = (int)shorthand[0];
+                var controllerKey = (string)shorthand[1];
+
+                switch (controllerKey) {
+                    case "LeftTrigger":
+                    case "RightTrigger": {
+                            var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
+                            float downMultiplier = 1;
+                            float upMultiplier = 0;
+
+                            if (shorthand.Length == 3) {
+                                try {
+                                    downMultiplier = (int)shorthand[2];
+                                } catch (System.Exception) {
+                                    downMultiplier = (float)(decimal)shorthand[2];
+                                }
+                            }
+                            if (shorthand.Length == 4) {
+                                try {
+                                    downMultiplier = (int)shorthand[2];
+                                } catch (System.Exception) {
+                                    downMultiplier = (float)(decimal)shorthand[2];
+                                }
+                                try {
+                                    upMultiplier = (int)shorthand[3];
+                                } catch (System.Exception) {
+                                    upMultiplier = (float)(decimal)shorthand[3];
+                                }
+                            }
+
+                            var downValue = (int)System.Math.Round(byte.MaxValue * downMultiplier);
+                            var upValue = (int)System.Math.Round(0 * upMultiplier);
+
+                            KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
+
+                            break;
+                        }
+                    case "LeftStickX":
+                    case "LeftStickY":
+                    case "RightStickX":
+                    case "RightStickY": {
+                            var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
+                            float downMultiplier = 1;
+                            float upMultiplier = 0;
+
+                            if (shorthand.Length == 3) {
+                                try {
+                                    downMultiplier = (int)shorthand[2];
+                                } catch (System.Exception) {
+                                    downMultiplier = (float)(decimal)shorthand[2];
+                                }
+                            }
+                            if (shorthand.Length == 4) {
+                                try {
+                                    downMultiplier = (int)shorthand[2];
+                                } catch (System.Exception) {
+                                    downMultiplier = (float)(decimal)shorthand[2];
+                                }
+                                try {
+                                    upMultiplier = (int)shorthand[3];
+                                } catch (System.Exception) {
+                                    upMultiplier = (float)(decimal)shorthand[3];
+                                }
+                            }
+
+                            var downValue = (int)System.Math.Round(short.MaxValue * downMultiplier);
+                            var upValue = (int)System.Math.Round(0 * upMultiplier);
+
+                            KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
+
+                            break;
+                        }
+                    default: {
+                            var button = (X360Buttons)System.Enum.Parse(typeof(X360Buttons), controllerKey);
+
+                            KeyboardMappings[pair.Key] = new KeyboardDownToButton { Index = controllerIndex, Button = button };
+
+                            break;
+                        }
+                }
+            }
+        }
+
+        static List<System.Windows.Forms.Keys> keysDown = new List<System.Windows.Forms.Keys>();
+
         private static void Manager_OnChange (object sender, ControllerManagerEventArgs e) {
             Bus.Report(e.Index + 1, e.Controller.GetReport());
         }
 
         private static void KeyboardHook_KeyDown (object sender, System.Windows.Forms.KeyEventArgs e) {
-            var isHandled = false;
-
-            switch (e.KeyCode) {
-                case System.Windows.Forms.Keys.Escape:
-                    isHandled = true;
-                    if (IsRunning) {
-                        Stop();
-                    }
-                    break;
-
-                case System.Windows.Forms.Keys.LShiftKey:
-                    Manager.ButtonDown(0, X360Buttons.A);
-                    isHandled = true;
-                    break;
-                case System.Windows.Forms.Keys.Z:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.B);
-                    break;
-                case System.Windows.Forms.Keys.LControlKey:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.X);
-                    break;
-                case System.Windows.Forms.Keys.Alt:
-                case System.Windows.Forms.Keys.LMenu:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.Y);
-                    break;
-                case System.Windows.Forms.Keys.D1:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.Start);
-                    break;
-                case System.Windows.Forms.Keys.D3:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.Back);
-                    break;
-                case System.Windows.Forms.Keys.C:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.LeftBumper);
-                    break;
-                case System.Windows.Forms.Keys.Space:
-                    isHandled = true;
-                    Manager.ButtonDown(0, X360Buttons.RightBumper);
-                    break;
-
-                case System.Windows.Forms.Keys.Up:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickY, short.MaxValue);
-                    break;
-                case System.Windows.Forms.Keys.Down:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickY, short.MinValue);
-                    break;
-                case System.Windows.Forms.Keys.Left:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickX, short.MinValue);
-                    break;
-                case System.Windows.Forms.Keys.Right:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickX, short.MaxValue);
-                    break;
-
-                case System.Windows.Forms.Keys.D5:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftTrigger, byte.MaxValue);
-                    break;
-                case System.Windows.Forms.Keys.X:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.RightTrigger, byte.MaxValue);
-                    break;
+            if (KeyboardMappings.ContainsKey(e.KeyCode.ToString())) {
+                KeyboardMappings[e.KeyCode.ToString()].Run();
+                e.Handled = true;
             }
 
-            if (isHandled) {
-                e.Handled = true;
+            if (IsDebug) {
+                if (!keysDown.Contains(e.KeyCode)) {
+                    keysDown.Add(e.KeyCode);
+                    var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
+                    System.Console.WriteLine($"down: {message}");
+                }
             }
         }
 
         private static void KeyboardHook_KeyUp (object sender, System.Windows.Forms.KeyEventArgs e) {
-            var isHandled = false;
-
-            switch (e.KeyCode) {
-                case System.Windows.Forms.Keys.LShiftKey:
-                    Manager.ButtonUp(0, X360Buttons.A);
-                    isHandled = true;
-                    break;
-                case System.Windows.Forms.Keys.Z:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.B);
-                    break;
-                case System.Windows.Forms.Keys.LControlKey:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.X);
-                    break;
-                case System.Windows.Forms.Keys.Alt:
-                case System.Windows.Forms.Keys.LMenu:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.Y);
-                    break;
-                case System.Windows.Forms.Keys.D1:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.Start);
-                    break;
-                case System.Windows.Forms.Keys.D3:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.Back);
-                    break;
-                case System.Windows.Forms.Keys.C:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.LeftBumper);
-                    break;
-                case System.Windows.Forms.Keys.Space:
-                    isHandled = true;
-                    Manager.ButtonUp(0, X360Buttons.RightBumper);
-                    break;
-
-                case System.Windows.Forms.Keys.Up:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickY, 0);
-                    break;
-                case System.Windows.Forms.Keys.Down:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickY, 0);
-                    break;
-                case System.Windows.Forms.Keys.Left:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickX, 0);
-                    break;
-                case System.Windows.Forms.Keys.Right:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftStickX, 0);
-                    break;
-
-                case System.Windows.Forms.Keys.D5:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.LeftTrigger, byte.MinValue);
-                    break;
-                case System.Windows.Forms.Keys.X:
-                    isHandled = true;
-                    Manager.SetAxis(0, X360Axis.RightTrigger, byte.MinValue);
-                    break;
+            if (KeyboardMappings.ContainsKey(e.KeyCode.ToString())) {
+                KeyboardMappings[e.KeyCode.ToString()].Run(true);
+                e.Handled = true;
             }
 
-            if (isHandled) {
-                e.Handled = true;
+            if (IsDebug) {
+                if (keysDown.Contains(e.KeyCode)) {
+                    keysDown.Remove(e.KeyCode);
+                    var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
+                    System.Console.WriteLine($"down: {message}");
+                }
             }
         }
     }
