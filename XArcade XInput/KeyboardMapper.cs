@@ -5,6 +5,7 @@ using System.Linq;
 namespace XArcade_XInput {
     class KeyboardMapper {
         public bool IsRunning = false;
+        public string CurrentMapping;
         Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
         Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
 
@@ -148,6 +149,8 @@ namespace XArcade_XInput {
                             break;
                         }
                 }
+
+                CurrentMapping = mappingJsonContents;
             }
         }
 

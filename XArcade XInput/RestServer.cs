@@ -117,5 +117,15 @@ namespace XArcade_XInput {
 
             return ctx;
         }
+
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/keyboard/mapping")]
+        public IHttpContext KeyboardGetMapping (IHttpContext ctx) {
+            RestServer.SetCORSHeaders(ctx);
+            RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
+                { "mapping", Program.Mapper.CurrentMapping },
+            });
+
+            return ctx;
+        }
     }
 }
