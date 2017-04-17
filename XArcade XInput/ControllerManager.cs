@@ -16,6 +16,8 @@ namespace XArcade_XInput {
     }
 
     class ControllerManager {
+        ScpBus Bus;
+        bool IsRunning = false;
         public event System.EventHandler<ControllerManagerEventArgs> OnChange;
 
         X360Controller[] controllers = new X360Controller[] {
@@ -25,7 +27,37 @@ namespace XArcade_XInput {
             new X360Controller(),
         };
 
+        public ControllerManager () {
+            Bus = new ScpBus();
+        }
+
+        public void Start () {
+            IsRunning = true;
+            UnplugAll();
+            Bus.PlugIn(1);
+            Bus.PlugIn(2);
+        }
+
+        public void Stop () {
+            IsRunning = false;
+            UnplugAll();
+        }
+
+        public void UnplugAll () {
+            // Reset all inputs
+            Bus.Report(1, new X360Controller().GetReport());
+            Bus.Report(2, new X360Controller().GetReport());
+
+            System.Threading.Thread.Sleep(250);
+            Bus.UnplugAll();
+            System.Threading.Thread.Sleep(250);
+        }
+
         public void ButtonDown (int Index, X360Buttons Button) {
+            if (!IsRunning) {
+                return;
+            }
+
             var current = controllers[Index];
             var next = new X360Controller(current);
             next.Buttons |= Button;
@@ -39,6 +71,10 @@ namespace XArcade_XInput {
         }
 
         public void ButtonUp (int Index, X360Buttons Button) {
+            if (!IsRunning) {
+                return;
+            }
+
             var current = controllers[Index];
             var next = new X360Controller(current);
             next.Buttons &= ~Button;
@@ -52,6 +88,10 @@ namespace XArcade_XInput {
         }
 
         public void SetAxis (int Index, X360Axis Axis, int Value) {
+            if (!IsRunning) {
+                return;
+            }
+
             int current = int.MinValue;
             var controller = controllers[Index];
 
@@ -109,6 +149,8 @@ namespace XArcade_XInput {
         }
 
         void InvokeChange (int Index) {
+            Bus.Report(Index + 1, controllers[Index].GetReport());
+
             OnChange?.Invoke(null, new ControllerManagerEventArgs {
                 Index = Index,
                 Controller = controllers[Index],
