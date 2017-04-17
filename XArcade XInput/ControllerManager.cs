@@ -39,8 +39,11 @@ namespace XArcade_XInput {
 
             IsRunning = true;
             UnplugAll();
-            Bus.PlugIn(1);
-            Bus.PlugIn(2);
+
+            foreach (var index in Program.Mapper.MappedControllerIndexes) {
+                Bus.PlugIn(index + 1);
+            }
+
             System.Console.WriteLine("Started ControllerManager");
         }
 
@@ -52,8 +55,9 @@ namespace XArcade_XInput {
 
         public void UnplugAll () {
             // Reset all inputs
-            Bus.Report(1, new X360Controller().GetReport());
-            Bus.Report(2, new X360Controller().GetReport());
+            foreach (var index in Program.Mapper.MappedControllerIndexes) {
+                Bus.Report(index + 1, new X360Controller().GetReport());
+            }
 
             System.Threading.Thread.Sleep(250);
             Bus.UnplugAll();
