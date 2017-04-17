@@ -13,8 +13,6 @@
                 }
             }
 
-            Manager = new ControllerManager();
-            Mapper = new KeyboardMapper();
             for (var i = 0; i < args.Length; i++) {
                 if (args[i] == "--default") {
                     ForceDefaultMapping = true;
@@ -22,6 +20,8 @@
             }
 
             Server = new RestServer();
+            Mapper = new KeyboardMapper();
+            Manager = new ControllerManager();
 
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
             var defaultMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "X-Arcade 2 Player Analog.json" });
