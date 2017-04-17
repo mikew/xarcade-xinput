@@ -8,6 +8,7 @@ namespace XArcade_XInput {
         public string CurrentMapping;
         Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
         Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
+        public event System.EventHandler OnParse;
 
         public KeyboardMapper () {
             KeyboardHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
@@ -111,6 +112,8 @@ namespace XArcade_XInput {
 
                 CurrentMapping = mappingJsonContents;
             }
+
+            OnParse?.Invoke(this, new System.EventArgs());
         }
 
         float[] ParseAxisMultipliers (object[] shorthand) {
