@@ -5,10 +5,15 @@ using System.Collections.Generic;
 
 namespace XArcade_XInput {
     class RestServer {
+        public bool IsRunning = false;
         Grapevine.Server.RestServer _server;
         int Port = 32123;
 
-        public RestServer () {
+        public void Start () {
+            if (IsRunning) {
+                return;
+            }
+
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
             var publicPath = System.IO.Path.Combine(new string[] { appdir, "webapp" });
 
@@ -21,6 +26,11 @@ namespace XArcade_XInput {
             }
 
             _server.Start();
+            IsRunning = true;
+        }
+
+        public void Stop () {
+            _server.Stop();
         }
 
         static public void SetCORSHeaders (IHttpContext ctx) {

@@ -14,6 +14,10 @@ namespace XArcade_XInput {
         }
 
         public void Start () {
+            if (IsRunning) {
+                return;
+            }
+
             IsRunning = true;
             KeyboardHook.KeyDown += KeyboardHook_KeyDown;
             KeyboardHook.KeyUp += KeyboardHook_KeyUp;

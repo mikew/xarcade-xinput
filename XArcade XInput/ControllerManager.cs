@@ -33,6 +33,10 @@ namespace XArcade_XInput {
         }
 
         public void Start () {
+            if (IsRunning) {
+                return;
+            }
+
             IsRunning = true;
             UnplugAll();
             Bus.PlugIn(1);
