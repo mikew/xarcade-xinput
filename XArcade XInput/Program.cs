@@ -34,8 +34,16 @@
             System.Console.WriteLine($"Loading mapping from {defaultMappingPath}");
             Mapper.ParseMapping(System.IO.File.ReadAllText(defaultMappingPath));
 
-            Manager.Start();
+            Mapper.OnParse += (s, e) => {
+                if (Mapper.IsRunning) {
+                    Manager.Stop();
+                    Manager.Start();
+                }
+            };
+
+            Server.Start();
             Mapper.Start();
+            Manager.Start();
 
             // See https://github.com/gmamaladze/globalmousekeyhook/issues/3#issuecomment-230909645
             System.Windows.Forms.ApplicationContext msgLoop = new System.Windows.Forms.ApplicationContext();
