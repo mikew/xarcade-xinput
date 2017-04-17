@@ -83,6 +83,9 @@ namespace XArcade_XInput {
 
             controllers[Index] = next;
             InvokeChange(Index);
+            if (Program.IsDebug) {
+                System.Console.WriteLine($"Controller #{Index + 1} {Button} Button Down");
+            }
         }
 
         public void ButtonUp (int Index, X360Buttons Button) {
@@ -105,6 +108,9 @@ namespace XArcade_XInput {
 
             controllers[Index] = next;
             InvokeChange(Index);
+            if (Program.IsDebug) {
+                System.Console.WriteLine($"Controller #{Index + 1} {Button} Button Up");
+            }
         }
 
         public void SetAxis (int Index, X360Axis Axis, int Value) {
@@ -166,6 +172,9 @@ namespace XArcade_XInput {
             }
 
             InvokeChange(Index);
+            if (Program.IsDebug) {
+                System.Console.WriteLine($"Controller #{Index + 1} {Axis} {Value}");
+            }
         }
 
         void InvokeChange (int Index) {
