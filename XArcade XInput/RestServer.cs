@@ -104,6 +104,9 @@ namespace XArcade_XInput {
 
             try {
                 Program.Mapper.ParseMapping(ctx.Request.Payload);
+                var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
+                var currentMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "current.json" });
+                System.IO.File.WriteAllText(currentMappingPath, ctx.Request.Payload);
                 RestServer.CloseResponse(ctx);
             } catch (System.Exception e) {
                 ctx.Response.StatusCode = HttpStatusCode.InternalServerError;

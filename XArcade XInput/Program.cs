@@ -17,8 +17,15 @@
             Server = new RestServer();
 
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
-            var mappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "default.json" });
-            Mapper.ParseMapping(System.IO.File.ReadAllText(mappingPath));
+            var defaultMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "X-Arcade 2 Player Analog.json" });
+            var currentMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "current.json" });
+
+            if (System.IO.File.Exists(currentMappingPath)) {
+                defaultMappingPath = currentMappingPath;
+            }
+
+            System.Console.WriteLine($"Loading mapping from {defaultMappingPath}");
+            Mapper.ParseMapping(System.IO.File.ReadAllText(defaultMappingPath));
 
             Manager.Start();
             Mapper.Start();
