@@ -74,67 +74,22 @@ namespace XArcade_XInput {
 
                 switch (controllerKey) {
                     case "LeftTrigger":
-                    case "RightTrigger": {
-                            var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
-                            float downMultiplier = 1;
-                            float upMultiplier = 0;
-
-                            if (shorthand.Length == 3) {
-                                try {
-                                    downMultiplier = (int)shorthand[2];
-                                } catch (System.Exception) {
-                                    downMultiplier = (float)(decimal)shorthand[2];
-                                }
-                            }
-                            if (shorthand.Length == 4) {
-                                try {
-                                    downMultiplier = (int)shorthand[2];
-                                } catch (System.Exception) {
-                                    downMultiplier = (float)(decimal)shorthand[2];
-                                }
-                                try {
-                                    upMultiplier = (int)shorthand[3];
-                                } catch (System.Exception) {
-                                    upMultiplier = (float)(decimal)shorthand[3];
-                                }
-                            }
-
-                            var downValue = (int)System.Math.Round(byte.MaxValue * downMultiplier);
-                            var upValue = (int)System.Math.Round(0 * upMultiplier);
-
-                            KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
-
-                            break;
-                        }
+                    case "RightTrigger":
                     case "LeftStickX":
                     case "LeftStickY":
                     case "RightStickX":
                     case "RightStickY": {
+                            var maxValue = short.MaxValue;
+
+                            if (controllerKey == "LeftTrigger" || controllerKey == "RightTrigger") {
+                                maxValue = byte.MaxValue;
+                            }
+
                             var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
-                            float downMultiplier = 1;
-                            float upMultiplier = 0;
-
-                            if (shorthand.Length == 3) {
-                                try {
-                                    downMultiplier = (int)shorthand[2];
-                                } catch (System.Exception) {
-                                    downMultiplier = (float)(decimal)shorthand[2];
-                                }
-                            }
-                            if (shorthand.Length == 4) {
-                                try {
-                                    downMultiplier = (int)shorthand[2];
-                                } catch (System.Exception) {
-                                    downMultiplier = (float)(decimal)shorthand[2];
-                                }
-                                try {
-                                    upMultiplier = (int)shorthand[3];
-                                } catch (System.Exception) {
-                                    upMultiplier = (float)(decimal)shorthand[3];
-                                }
-                            }
-
-                            var downValue = (int)System.Math.Round(short.MaxValue * downMultiplier);
+                            var multipliers = ParseAxisMultipliers(shorthand);
+                            var downMultiplier = multipliers[0];
+                            var upMultiplier = multipliers[1];
+                            var downValue = (int)System.Math.Round(maxValue * downMultiplier);
                             var upValue = (int)System.Math.Round(0 * upMultiplier);
 
                             KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
@@ -154,6 +109,32 @@ namespace XArcade_XInput {
             }
         }
 
+        float[] ParseAxisMultipliers (object[] shorthand) {
+            float downMultiplier = 1;
+            float upMultiplier = 0;
+
+            if (shorthand.Length == 3) {
+                try {
+                    downMultiplier = (int)shorthand[2];
+                } catch (System.Exception) {
+                    downMultiplier = (float)(decimal)shorthand[2];
+                }
+            }
+            if (shorthand.Length == 4) {
+                try {
+                    downMultiplier = (int)shorthand[2];
+                } catch (System.Exception) {
+                    downMultiplier = (float)(decimal)shorthand[2];
+                }
+                try {
+                    upMultiplier = (int)shorthand[3];
+                } catch (System.Exception) {
+                    upMultiplier = (float)(decimal)shorthand[3];
+                }
+            }
+
+            return new float[] { downMultiplier, upMultiplier };
+        }
     }
 
     class IKeyboardActionToGamepad {
