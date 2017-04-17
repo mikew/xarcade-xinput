@@ -39,6 +39,8 @@
                     Manager.Stop();
                     Manager.Start();
                 }
+
+                System.IO.File.WriteAllText(currentMappingPath, Mapper.CurrentMapping);
             };
 
             Server.Start();
