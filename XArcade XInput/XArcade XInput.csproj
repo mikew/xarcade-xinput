@@ -73,6 +73,9 @@
   <ItemGroup>
     <MappingFiles Include="mappings\**\*.*"/>
   </ItemGroup>
+  <ItemGroup>
+    <ScpDriverFiles Include="..\Scp Driver Installer\**\*.*"/>
+  </ItemGroup>
 
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -84,6 +87,7 @@
   <Target Name="AfterBuild">
     <Copy SourceFiles="@(MappingFiles)" DestinationFolder="$(OutDir)mappings\%(RecursiveDir)" />
     <Copy SourceFiles="@(WebappFiles)" DestinationFolder="$(OutDir)webapp\%(RecursiveDir)"/>
+    <Copy SourceFiles="@(ScpDriverFiles)" DestinationFolder="$(OutDir)Scp Driver Installer\%(RecursiveDir)"/>
     <Copy SourceFiles="..\README.md" DestinationFolder="$(OutDir)"/>
   </Target>
 </Project>
