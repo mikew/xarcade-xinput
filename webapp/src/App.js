@@ -16,11 +16,11 @@ class App extends PureComponent {
   componentDidMount () {
     this.updateStatus()
 
-    this.updateStatusInterval = setInterval(this.updateStatus, 3000)
+    //this.updateStatusInterval = setInterval(this.updateStatus, 3000)
   }
 
   componentWillUnmount () {
-    clearInterval(this.updateStatusInterval)
+    //clearInterval(this.updateStatusInterval)
   }
 
   render() {
@@ -72,10 +72,12 @@ class App extends PureComponent {
 
   stop = () => {
     return this.stopControllers().then(this.stopKeyboard)
+      .then(this.updateStatus)
   }
 
   start = () => {
     return this.startControllers().then(this.startKeyboard)
+      .then(this.updateStatus)
   }
 
   setMapping = () => {
@@ -89,6 +91,7 @@ class App extends PureComponent {
       method: 'POST',
       body: value,
     })
+      .then(this.updateStatus)
   }
 
   updateStatus = () => {
