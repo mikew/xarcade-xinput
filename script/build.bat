@@ -2,6 +2,7 @@
 
 del /F /S /Q webapp\build\
 cd webapp\
+call yarn install
 call yarn run build
 cd ..
 
