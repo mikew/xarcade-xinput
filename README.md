@@ -6,12 +6,12 @@ Technically, turns any keyboard input into 360 Controllers, but the default is t
 
 ## Installation
 
-1. Download
-2. Instal ScpDriver
+1. [Download the latest release](https://github.com/mikew/xarcade-xinput/releases/latest)
+2. Run `Scp Driver Installer\ScpDriverInstaller.exe` and press `Install`
 3. Run in Admin Command Prompt:
     ```dos
     netsh advfirewall firewall add rule name="XArcade XInput" dir=in action=allow protocol=TCP localport=32123
-    netsh http add urlacl "url=http://*:32123/" user=Everyone
+    netsh http add urlacl url=http://+:32123/ user=Everyone
     ```
 3. Run `XArcade XInput.exe`
 
