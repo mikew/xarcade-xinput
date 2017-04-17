@@ -17,7 +17,7 @@ namespace XArcade_XInput {
 
     class ControllerManager {
         ScpBus Bus;
-        bool IsRunning = false;
+        public bool IsRunning = false;
         public event System.EventHandler<ControllerManagerEventArgs> OnChange;
 
         X360Controller[] controllers = new X360Controller[] {
@@ -36,11 +36,13 @@ namespace XArcade_XInput {
             UnplugAll();
             Bus.PlugIn(1);
             Bus.PlugIn(2);
+            System.Console.WriteLine("Started ControllerManager");
         }
 
         public void Stop () {
             IsRunning = false;
             UnplugAll();
+            System.Console.WriteLine("Stopped ControllerManager");
         }
 
         public void UnplugAll () {

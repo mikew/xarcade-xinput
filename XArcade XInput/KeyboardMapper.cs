@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace XArcade_XInput {
     class KeyboardMapper {
+        public bool IsRunning = false;
         Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
         Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
 
@@ -12,13 +13,17 @@ namespace XArcade_XInput {
         }
 
         public void Start () {
+            IsRunning = true;
             KeyboardHook.KeyDown += KeyboardHook_KeyDown;
             KeyboardHook.KeyUp += KeyboardHook_KeyUp;
+            System.Console.WriteLine("Started KeyboardMapper");
         }
 
         public void Stop () {
+            IsRunning = false;
             KeyboardHook.KeyDown -= KeyboardHook_KeyDown;
             KeyboardHook.KeyUp -= KeyboardHook_KeyUp;
+            System.Console.WriteLine("Stopped KeyboardMapper");
         }
 
         static List<System.Windows.Forms.Keys> keysDown = new List<System.Windows.Forms.Keys>();
