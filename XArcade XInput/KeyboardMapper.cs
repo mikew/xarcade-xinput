@@ -6,6 +6,7 @@ namespace XArcade_XInput {
     class KeyboardMapper {
         public bool IsRunning = false;
         public string CurrentMapping;
+        public List<int> MappedControllerIndexes = new List<int>();
         Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
         Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
         public event System.EventHandler OnParse;
@@ -71,6 +72,7 @@ namespace XArcade_XInput {
             var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
             var mapping = ser.DeserializeObject(mappingJsonContents) as Dictionary<string, object>;
 
+            MappedControllerIndexes.Clear();
             KeyboardMappings.Clear();
 
             foreach (var pair in mapping) {
@@ -79,6 +81,7 @@ namespace XArcade_XInput {
                 var shorthand = pair.Value as object[];
                 var controllerIndex = (int)shorthand[0];
                 var controllerKey = (string)shorthand[1];
+                var didMap = false;
 
                 switch (controllerKey) {
                     case "LeftTrigger":
@@ -101,6 +104,7 @@ namespace XArcade_XInput {
                             var upValue = (int)System.Math.Round(0 * upMultiplier);
 
                             KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
+                            didMap = true;
 
                             break;
                         }
@@ -108,15 +112,21 @@ namespace XArcade_XInput {
                             var button = (X360Buttons)System.Enum.Parse(typeof(X360Buttons), controllerKey);
 
                             KeyboardMappings[pair.Key] = new KeyboardDownToButton { Index = controllerIndex, Button = button };
+                            didMap = true;
 
                             break;
                         }
                 }
 
-                CurrentMapping = mappingJsonContents;
+                if (didMap) {
+                    if (!MappedControllerIndexes.Contains(controllerIndex)) {
+                        MappedControllerIndexes.Add(controllerIndex);
+                    }
+                }
             }
 
             OnParse?.Invoke(this, new System.EventArgs());
+            CurrentMapping = mappingJsonContents;
         }
 
         float[] ParseAxisMultipliers (object[] shorthand) {
