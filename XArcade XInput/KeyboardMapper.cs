@@ -44,7 +44,7 @@ namespace XArcade_XInput {
                 if (!keysDown.Contains(e.KeyCode)) {
                     keysDown.Add(e.KeyCode);
                     var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
-                    System.Console.WriteLine($"down: {message}");
+                    System.Console.WriteLine($"Keyboard: {message}");
                 }
             }
         }
@@ -59,7 +59,10 @@ namespace XArcade_XInput {
                 if (keysDown.Contains(e.KeyCode)) {
                     keysDown.Remove(e.KeyCode);
                     var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
-                    System.Console.WriteLine($"down: {message}");
+                    if (string.IsNullOrEmpty(message)) {
+                        message = "All keys released";
+                    }
+                    System.Console.WriteLine($"Keyboard: {message}");
                 }
             }
         }
