@@ -84,5 +84,6 @@
   <Target Name="AfterBuild">
     <Copy SourceFiles="@(MappingFiles)" DestinationFolder="$(OutDir)mappings\%(RecursiveDir)" />
     <Copy SourceFiles="@(WebappFiles)" DestinationFolder="$(OutDir)webapp\%(RecursiveDir)"/>
+    <Copy SourceFiles="..\README.md" DestinationFolder="$(OutDir)"/>
   </Target>
 </Project>
