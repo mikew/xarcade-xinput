@@ -15,11 +15,18 @@ class App extends PureComponent {
 
   componentDidMount () {
     this.updateStatus()
+
+    this.updateStatusInterval = setInterval(this.updateStatus, 3000)
+  }
+
+  componentWillUnmount () {
+    clearInterval(this.updateStatusInterval)
   }
 
   render() {
     return (
       <div className="App">
+        {JSON.stringify(this.state)}
         {/*
         Controllers:
         <br />
@@ -40,7 +47,7 @@ class App extends PureComponent {
         
         <FormGroup>
           <Label for="exampleText">Mapping</Label>
-          <Input type="textarea" name="text" id="exampleText" getRef={x => this.mappingInput = x} />
+          <Input type="textarea" className="monospace" id="exampleText" getRef={x => this.mappingInput = x} />
         </FormGroup>
         <Button onClick={this.setMapping} block color="primary">Set Mapping</Button>
       </div>
@@ -48,19 +55,19 @@ class App extends PureComponent {
   }
 
   stopControllers = () => {
-    return fetch('http://localhost:32123/api/controller/stop', { method: 'POST' })
+    return fetch('/api/controller/stop', { method: 'POST' })
   }
 
   startControllers = () => {
-    return fetch('http://localhost:32123/api/controller/start', { method: 'POST' })
+    return fetch('/api/controller/start', { method: 'POST' })
   }
 
   stopKeyboard = () => {
-    return fetch('http://localhost:32123/api/keyboard/stop', { method: 'POST' })
+    return fetch('/api/keyboard/stop', { method: 'POST' })
   }
 
   startKeyboard = () => {
-    return fetch('http://localhost:32123/api/keyboard/start', { method: 'POST' })
+    return fetch('/api/keyboard/start', { method: 'POST' })
   }
 
   stop = () => {
@@ -72,17 +79,22 @@ class App extends PureComponent {
   }
 
   setMapping = () => {
-    console.log(this.mappingInput.value)
-    return fetch('http://localhost:32123/api/keyboard/mapping', {
+    const value = this.mappingInput.value.trim()
+
+    if (value === '') {
+      return Promise.resolve()
+    }
+
+    return fetch('/api/keyboard/mapping', {
       method: 'POST',
-      body: this.mappingInput.value,
+      body: value,
     })
   }
 
   updateStatus = () => {
-    return fetch('http://localhost:32123/api/status')
+    return fetch('/api/status')
       .then(x => x.json())
-      .then(console.log)
+      .then(x => this.setState(x))
   }
 }
 
