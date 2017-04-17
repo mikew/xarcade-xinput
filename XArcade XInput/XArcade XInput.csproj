@@ -71,7 +71,7 @@
     <WebappFiles Include="..\webapp\build\**\*.*" Exclude="..\webapp\build\**\*.map"/>
   </ItemGroup>
   <ItemGroup>
-    <MappingFiles Include="mappings\**\*.*"/>
+    <MappingFiles Include="..\mappings\**\*.*"/>
   </ItemGroup>
   <ItemGroup>
     <ScpDriverFiles Include="..\Scp Driver Installer\**\*.*"/>
