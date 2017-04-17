@@ -19,6 +19,7 @@ namespace XArcade_XInput {
         ScpBus Bus;
         public bool IsRunning = false;
         public event System.EventHandler<ControllerManagerEventArgs> OnChange;
+        bool DidEmulateGuide = false;
 
         X360Controller[] controllers = new X360Controller[] {
             new X360Controller(),
@@ -62,7 +63,15 @@ namespace XArcade_XInput {
 
             var current = controllers[Index];
             var next = new X360Controller(current);
+
             next.Buttons |= Button;
+
+            // RB + Start = Guide
+            if (next.Buttons.HasFlag(X360Buttons.RightBumper | X360Buttons.Start)) {
+                next.Buttons &= ~(X360Buttons.RightBumper | X360Buttons.Start);
+                next.Buttons |= X360Buttons.Logo;
+                DidEmulateGuide = true;
+            }
 
             if (current.Buttons == next.Buttons) {
                 return;
@@ -80,6 +89,11 @@ namespace XArcade_XInput {
             var current = controllers[Index];
             var next = new X360Controller(current);
             next.Buttons &= ~Button;
+
+            if (DidEmulateGuide && Button == X360Buttons.RightBumper || Button == X360Buttons.Start) {
+                next.Buttons &= ~(X360Buttons.Logo | X360Buttons.RightBumper | X360Buttons.Start);
+                DidEmulateGuide = false;
+            }
 
             if (current.Buttons == next.Buttons) {
                 return;

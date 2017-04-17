@@ -59,10 +59,10 @@ namespace XArcade_XInput {
         }
 
         public void ParseMapping (string mappingJsonContents) {
-            KeyboardMappings.Clear();
-
             var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
             var mapping = ser.DeserializeObject(mappingJsonContents) as Dictionary<string, object>;
+
+            KeyboardMappings.Clear();
 
             foreach (var pair in mapping) {
                 System.Console.WriteLine($"Loadding mapping for {pair.Key} ...");
