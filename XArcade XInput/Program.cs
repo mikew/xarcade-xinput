@@ -4,6 +4,7 @@
         static public KeyboardMapper Mapper;
         static public RestServer Server;
         static public bool IsDebug = false;
+        static public bool ForceDefaultMapping = false;
 
         static void Main (string[] args) {
             for (var i = 0; i < args.Length; i++) {
@@ -14,13 +15,19 @@
 
             Manager = new ControllerManager();
             Mapper = new KeyboardMapper();
+            for (var i = 0; i < args.Length; i++) {
+                if (args[i] == "--default") {
+                    ForceDefaultMapping = true;
+                }
+            }
+
             Server = new RestServer();
 
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
             var defaultMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "X-Arcade 2 Player Analog.json" });
             var currentMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "current.json" });
 
-            if (System.IO.File.Exists(currentMappingPath)) {
+            if (!ForceDefaultMapping && System.IO.File.Exists(currentMappingPath)) {
                 defaultMappingPath = currentMappingPath;
             }
 
