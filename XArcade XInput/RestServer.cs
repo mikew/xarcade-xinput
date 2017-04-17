@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace XArcade_XInput {
     class RestServer {
         Grapevine.Server.RestServer _server;
+        int Port = 32123;
 
         public RestServer () {
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
@@ -13,10 +14,13 @@ namespace XArcade_XInput {
 
             _server = new Grapevine.Server.RestServer();
             _server.Host = "+";
-            _server.Port = "32123";
+            _server.Port = Port.ToString();
             _server.PublicFolder = new Grapevine.Server.PublicFolder(publicPath);
-            _server.PublicFolder.IndexFileName = "index.html";
-            _server.LogToConsole().Start();
+            if (Program.IsDebug) {
+                _server.LogToConsole();
+            }
+
+            _server.Start();
         }
 
         static public void SetCORSHeaders (IHttpContext ctx) {
@@ -42,7 +46,11 @@ namespace XArcade_XInput {
     class DefaultRestResource {
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/")]
         public IHttpContext Index (IHttpContext ctx) {
-            ctx.Response.Redirect("/index.html");
+            string prefix = ctx.Server.PublicFolder.Prefix;
+            if (string.IsNullOrEmpty(prefix)) {
+                prefix = "/";
+            }
+            ctx.Response.Redirect($"{prefix}{ctx.Server.PublicFolder.IndexFileName}");
             RestServer.CloseResponse(ctx);
             return ctx;
         }
