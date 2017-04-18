@@ -1,0 +1,40 @@
+{
+    "LShiftKey": [0, "A"],
+    "Z": [0, "B"],
+    "LControlKey": [0, "X"],
+    "LMenu": [0, "Y"],
+
+    "D1": [0, "Start"],
+    "D3": [0, "Back"],
+    "C": [0, "LeftBumper"],
+    "Space": [0, "RightBumper"],
+
+    "Up": [0, "Up"],
+    "Down": [0, "Down"],
+    "Left": [0, "Left"],
+    "Right": [0, "Right"],
+
+    "D5": [0, "LeftTrigger"],
+    "X": [0, "RightTrigger"],
+
+
+    
+    "W": [1, "A"],
+    "E": [1, "B"],
+    "A": [1, "X"],
+    "S": [1, "Y"],
+
+    "2": [1, "Start"],
+    "4": [1, "Back"],
+    "Oem6": [1, "LeftBumper"],
+    "OemCloseBrackets": [1, "LeftBumper"],
+    "Q": [1, "RightBumper"],
+
+    "R": [1, "Up"],
+    "F": [1, "Down"],
+    "D": [1, "Left"],
+    "G": [1, "Right"],
+
+    "D6": [1, "LeftTrigger"],
+    "OemOpenBrackets": [1, "RightTrigger"]
+}
