@@ -1,6 +1,8 @@
 @echo off
 
 del /F /S /Q webapp\build\
+
+REM Build webapp
 cd webapp\
 call yarn install
 call yarn run build
