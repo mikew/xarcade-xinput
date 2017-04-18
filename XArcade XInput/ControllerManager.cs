@@ -38,6 +38,13 @@ namespace XArcade_XInput {
             }
 
             IsRunning = true;
+            controllers = new X360Controller[] {
+                new X360Controller(),
+                new X360Controller(),
+                new X360Controller(),
+                new X360Controller(),
+            };
+
             UnplugAll();
 
             foreach (var index in Program.Mapper.MappedControllerIndexes) {
