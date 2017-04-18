@@ -47,7 +47,7 @@ namespace XArcade_XInput {
 
             UnplugAll();
 
-            foreach (var index in Program.Mapper.MappedControllerIndexes) {
+            foreach (var index in Program.KeyboardMapperInstance.MappedControllerIndexes) {
                 Bus.PlugIn(index + 1);
             }
 
@@ -62,7 +62,7 @@ namespace XArcade_XInput {
 
         public void UnplugAll () {
             // Reset all inputs
-            foreach (var index in Program.Mapper.MappedControllerIndexes) {
+            foreach (var index in Program.KeyboardMapperInstance.MappedControllerIndexes) {
                 Bus.Report(index + 1, new X360Controller().GetReport());
             }
 

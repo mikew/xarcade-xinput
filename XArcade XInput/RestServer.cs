@@ -70,8 +70,8 @@ namespace XArcade_XInput {
         public IHttpContext Status (IHttpContext ctx) {
             RestServer.SetCORSHeaders(ctx);
             RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
-                { "isControllerRunning", Program.Manager.IsRunning },
-                { "isKeyboardRunning", Program.Mapper.IsRunning },
+                { "isControllerRunning", Program.ControllerManagerInstance.IsRunning },
+                { "isKeyboardRunning", Program.KeyboardMapperInstance.IsRunning },
             });
 
             return ctx;
@@ -79,7 +79,7 @@ namespace XArcade_XInput {
 
         [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/controller/stop")]
         public IHttpContext ControllerStop (IHttpContext ctx) {
-            Program.Manager.Stop();
+            Program.ControllerManagerInstance.Stop();
 
             RestServer.SetCORSHeaders(ctx);
             RestServer.CloseResponse(ctx);
@@ -89,7 +89,7 @@ namespace XArcade_XInput {
 
         [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/controller/start")]
         public IHttpContext ControllerStart (IHttpContext ctx) {
-            Program.Manager.Start();
+            Program.ControllerManagerInstance.Start();
 
             RestServer.SetCORSHeaders(ctx);
             RestServer.CloseResponse(ctx);
@@ -99,7 +99,7 @@ namespace XArcade_XInput {
 
         [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/keyboard/stop")]
         public IHttpContext KeyboardStop (IHttpContext ctx) {
-            Program.Mapper.Stop();
+            Program.KeyboardMapperInstance.Stop();
 
             RestServer.SetCORSHeaders(ctx);
             RestServer.CloseResponse(ctx);
@@ -109,7 +109,7 @@ namespace XArcade_XInput {
 
         [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/keyboard/start")]
         public IHttpContext KeyboardStart (IHttpContext ctx) {
-            Program.Mapper.Start();
+            Program.KeyboardMapperInstance.Start();
 
             RestServer.SetCORSHeaders(ctx);
             RestServer.CloseResponse(ctx);
@@ -122,7 +122,7 @@ namespace XArcade_XInput {
             RestServer.SetCORSHeaders(ctx);
 
             try {
-                Program.Mapper.ParseMapping(ctx.Request.Payload);
+                Program.KeyboardMapperInstance.ParseMapping(ctx.Request.Payload);
                 RestServer.CloseResponse(ctx);
             } catch (System.Exception e) {
                 ctx.Response.StatusCode = HttpStatusCode.InternalServerError;
@@ -138,7 +138,7 @@ namespace XArcade_XInput {
         public IHttpContext KeyboardGetMapping (IHttpContext ctx) {
             RestServer.SetCORSHeaders(ctx);
             RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
-                { "mapping", Program.Mapper.CurrentMapping },
+                { "mapping", Program.KeyboardMapperInstance.CurrentMapping },
             });
 
             return ctx;

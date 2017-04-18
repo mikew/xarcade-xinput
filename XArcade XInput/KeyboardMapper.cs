@@ -167,11 +167,11 @@ namespace XArcade_XInput {
 
         public override void Run (bool IsRelease = false) {
             if (IsRelease) {
-                Program.Manager.ButtonUp(Index, Button);
+                Program.ControllerManagerInstance.ButtonUp(Index, Button);
                 return;
             }
 
-            Program.Manager.ButtonDown(Index, Button);
+            Program.ControllerManagerInstance.ButtonDown(Index, Button);
         }
     }
 
@@ -182,11 +182,11 @@ namespace XArcade_XInput {
 
         override public void Run (bool IsRelease = false) {
             if (IsRelease) {
-                Program.Manager.SetAxis(Index, Axis, UpValue);
+                Program.ControllerManagerInstance.SetAxis(Index, Axis, UpValue);
                 return;
             }
 
-            Program.Manager.SetAxis(Index, Axis, DownValue);
+            Program.ControllerManagerInstance.SetAxis(Index, Axis, DownValue);
         }
     }
 }

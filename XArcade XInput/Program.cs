@@ -1,8 +1,8 @@
 ﻿namespace XArcade_XInput {
     class Program {
-        static public ControllerManager Manager;
-        static public KeyboardMapper Mapper;
-        static public RestServer Server;
+        static public ControllerManager ControllerManagerInstance;
+        static public KeyboardMapper KeyboardMapperInstance;
+        static public RestServer RestServerInstance;
         static public bool IsDebug = false;
         static public bool ForceDefaultMapping = false;
 
@@ -17,9 +17,9 @@
                 }
             }
 
-            Server = new RestServer();
-            Mapper = new KeyboardMapper();
-            Manager = new ControllerManager();
+            RestServerInstance = new RestServer();
+            KeyboardMapperInstance = new KeyboardMapper();
+            ControllerManagerInstance = new ControllerManager();
 
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
             var defaultMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "X-Arcade 2 Player Analog.json" });
@@ -30,20 +30,20 @@
             }
 
             System.Console.WriteLine($"Loading mapping from {defaultMappingPath}");
-            Mapper.ParseMapping(System.IO.File.ReadAllText(defaultMappingPath));
+            KeyboardMapperInstance.ParseMapping(System.IO.File.ReadAllText(defaultMappingPath));
 
-            Mapper.OnParse += (s, e) => {
-                if (Manager.IsRunning) {
-                    Manager.Stop();
-                    Manager.Start();
+            KeyboardMapperInstance.OnParse += (s, e) => {
+                if (ControllerManagerInstance.IsRunning) {
+                    ControllerManagerInstance.Stop();
+                    ControllerManagerInstance.Start();
                 }
 
-                System.IO.File.WriteAllText(currentMappingPath, Mapper.CurrentMapping);
+                System.IO.File.WriteAllText(currentMappingPath, KeyboardMapperInstance.CurrentMapping);
             };
 
-            Server.Start();
-            Mapper.Start();
-            Manager.Start();
+            RestServerInstance.Start();
+            KeyboardMapperInstance.Start();
+            ControllerManagerInstance.Start();
 
             // See https://github.com/gmamaladze/globalmousekeyhook/issues/3#issuecomment-230909645
             System.Windows.Forms.ApplicationContext msgLoop = new System.Windows.Forms.ApplicationContext();
