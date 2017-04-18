@@ -11,9 +11,7 @@
                 if (args[i] == "--debug") {
                     IsDebug = true;
                 }
-            }
 
-            for (var i = 0; i < args.Length; i++) {
                 if (args[i] == "--default") {
                     ForceDefaultMapping = true;
                 }
@@ -35,7 +33,7 @@
             Mapper.ParseMapping(System.IO.File.ReadAllText(defaultMappingPath));
 
             Mapper.OnParse += (s, e) => {
-                if (Mapper.IsRunning) {
+                if (Manager.IsRunning) {
                     Manager.Stop();
                     Manager.Start();
                 }
