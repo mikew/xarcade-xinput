@@ -1,11 +1,24 @@
 import React, { PureComponent } from 'react'
 
-import Button from 'reactstrap/lib/Button'
+import Button from 'material-ui/Button'
+import TextField from 'material-ui/TextField'
+import { LabelSwitch } from 'material-ui/Switch'
+import {
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  ListItemIcon,
+  ListSubheader,
+} from 'material-ui/List'
+
+/*
 import FormGroup from 'reactstrap/lib/FormGroup'
 import Label from 'reactstrap/lib/Label'
 import Input from 'reactstrap/lib/Input'
+*/
 
-const API_URL = ''
+const API_URL = 'http://10.0.1.18:32123'
 
 class App extends PureComponent {
   state = {
@@ -103,6 +116,17 @@ class App extends PureComponent {
   }
 }
 
+import AceEditor from 'react-ace'
+import 'brace/mode/json'
+import 'brace/theme/tomorrow_night_eighties'
+import {
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+} from 'material-ui/Dialog'
+
 class Mapping extends PureComponent {
   mappingInput = null
 
@@ -111,19 +135,145 @@ class Mapping extends PureComponent {
     mapping: null,
   }
 
+  state = {
+    currentMapping: null,
+    isEditorDialogOpen: false,
+  }
+
   render () {
-    return <div className="Mapping">
-      <FormGroup>
-        <Label for="exampleText">Mapping</Label>
-        <Input type="textarea" className="monospace" id="exampleText" getRef={x => this.mappingInput = x} />
-      </FormGroup>
-      <Button onClick={this.setMapping} block color="primary">Set Mapping</Button>
-    </div>
+    return <List>
+      <Dialog
+        title="Dialog With Actions"
+        open={this.state.isEditorDialogOpen}
+        onRequestClose={this.handleClose}
+      >
+        <DialogTitle>
+          Edit The Thing
+        </DialogTitle>
+        <DialogContent>
+          <TextField defaultValue="omg hi" label="Mapping Name" required />
+          <AceEditor
+            mode="json"
+            theme="tomorrow_night_eighties"
+            name="UNIQUE_ID_OF_DIV"
+            width="100%"
+            editorProps={{ $blockScrolling: true }}
+            defaultValue={this.state.currentMapping}
+          />
+          <DialogContentText>
+            You are editing the <em>current</em> mapping.
+            Save a copy to be able to recall it later.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button accent>Save As New</Button>
+          <Button primary raised>Save</Button>
+        </DialogActions>
+      </Dialog>
+      <ListSubheader>Mappings</ListSubheader>
+      <IconButton onClick={this.handleAddClick}><Icon>add</Icon></IconButton>
+      <IconButton><Icon>edit</Icon></IconButton>
+      <MappingEntry />
+      <MappingEntry />
+    </List>
   }
 
   setMapping = () => {
     const value = this.mappingInput.value.trim()
     this.props.onClickSet(value)
+  }
+
+  handleClose = () => {
+    this.setState({ isEditorDialogOpen: false })
+  }
+
+  handleAddClick = () => {
+    fetch(`${API_URL}/api/keyboard/mapping`)
+      .then(x => x.json())
+      .then(x => this.setState({
+        currentMapping: x.mapping,
+        isEditorDialogOpen: true,
+      }))
+  }
+}
+
+import IconButton from 'material-ui/IconButton';
+import Icon from 'material-ui/Icon';
+import {
+  Menu,
+  MenuItem,
+} from 'material-ui/Menu';
+
+class IconMenu extends PureComponent {
+  state = {
+    menuAnchor: null,
+    isMenuOpen: false,
+  }
+
+  render () {
+    const {
+      icon,
+      children,
+      ...props,
+    } = this.props
+
+    return <div>
+      <IconButton onClick={this.openMenu}>{icon}</IconButton>
+      <Menu
+        open={this.state.isMenuOpen}
+        anchorEl={this.state.menuAnchor}
+        onRequestClose={this.closeMenu}
+        {...props}
+      >
+        {children}
+      </Menu>
+    </div>
+  }
+
+  openMenu = (event) => {
+    this.setState({
+      menuAnchor: event.currentTarget,
+      isMenuOpen: true,
+    })
+  }
+
+  closeMenu = () => {
+    this.setState({
+      menuAnchor: null,
+      isMenuOpen: false,
+    })
+  }
+}
+
+class MappingEntry extends PureComponent {
+  render () {
+    return <ListItem divider ref={x => this.menuIcon = x}>
+      <ListItemText primary="asdff" secondary="Created 3 days ago" />
+      <ListItemSecondaryAction>
+        <IconMenu icon="more_vert">
+          <MenuItem component="div">
+            <ListItemIcon>
+              <Icon>check_circle</Icon>
+            </ListItemIcon>
+            Make Active
+          </MenuItem>
+
+          <MenuItem component="div">
+            <ListItemIcon>
+              <Icon>content_copy</Icon>
+            </ListItemIcon>
+            Copy
+          </MenuItem>
+
+          <MenuItem component="div">
+            <ListItemIcon>
+              <Icon>delete_forever</Icon>
+            </ListItemIcon>
+            Delete
+          </MenuItem>
+        </IconMenu>
+      </ListItemSecondaryAction>
+    </ListItem>
   }
 }
 
@@ -140,15 +290,13 @@ class Status extends PureComponent {
       ? 'Running'
       : 'Not Running'
 
-    const mainButton = this.props.isRunning
-      ? <Button color="danger" onClick={this.props.onClickStop}>Stop</Button>
-      : <Button color="success" onClick={this.props.onClickStart}>Start</Button>
-
     return <div className="Status">
-      {heading}
+      <ListSubheader>Status: {heading}</ListSubheader>
+      <LabelSwitch label="Keyboard" checked={this.props.isRunning} />
       <br />
-      {mainButton}
-      <Button onClick={this.props.onClickRestart}>Restart</Button>
+      <LabelSwitch label="Controllers" checked={this.props.isRunning} />
+      <br />
+      <Button onClick={this.props.onClickRestart} raised>Restart</Button>
       <br /><br />
     </div>
   }

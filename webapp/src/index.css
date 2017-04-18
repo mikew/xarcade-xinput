@@ -1,8 +1,8 @@
 html,
 body,
-#root,
-.App {
-  height: 100%;
+th,
+td {
+  font-family: Roboto, sans-serif;
 }
 
 .monospace,
@@ -10,6 +10,19 @@ body,
 {
   font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
   /*font-size: 0.7rem;*/
+}
+
+.App {
+  max-width: 600px;
+  margin: auto;
+}
+
+/*
+html,
+body,
+#root,
+.App {
+  height: 100%;
 }
 
 .App {
@@ -30,3 +43,4 @@ body,
 .Mapping textarea {
   height: calc(100% - 50px);
 }
+*/
