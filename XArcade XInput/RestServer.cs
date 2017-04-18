@@ -26,6 +26,7 @@ namespace XArcade_XInput {
             }
 
             _server.Start();
+            System.Diagnostics.Process.Start($"http://localhost:{Port}");
             IsRunning = true;
         }
 
