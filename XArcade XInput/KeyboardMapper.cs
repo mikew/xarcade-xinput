@@ -125,8 +125,8 @@ namespace XArcade_XInput {
                 }
             }
 
-            OnParse?.Invoke(this, new System.EventArgs());
             CurrentMapping = mappingJsonContents;
+            OnParse?.Invoke(this, new System.EventArgs());
         }
 
         float[] ParseAxisMultipliers (object[] shorthand) {
