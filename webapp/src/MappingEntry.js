@@ -8,36 +8,58 @@ import {
   MenuItem,
   Icon,
   IconMenu,
+  connect,
 } from './common'
 
-export default class MappingEntry extends PureComponent {
+import * as actions from './mappings/actions'
+
+class MappingEntry extends PureComponent {
+  menu = null
+
   render () {
+    let icon = null
+
+    if (this.props.isActive) {
+      icon = <ListItemIcon>
+        <Icon>check_circle</Icon>
+      </ListItemIcon>
+    }
+
     return <ListItem divider ref={x => this.menuIcon = x}>
-      <ListItemText primary="asdff" secondary="Created 3 days ago" />
+      {icon}
+      <ListItemText primary={this.props.name} secondary="Created 3 days ago" />
       <ListItemSecondaryAction>
-        <IconMenu icon="more_vert">
-          <MenuItem component="div">
+        <IconMenu icon="more_vert" ref={x => this.menu = x}>
+          <MenuItem component="div" onClick={this.makeActive}>
             <ListItemIcon>
               <Icon>check_circle</Icon>
             </ListItemIcon>
             Make Active
           </MenuItem>
 
-          <MenuItem component="div">
+          <MenuItem component="div" onClick={this.startEditing}>
             <ListItemIcon>
-              <Icon>content_copy</Icon>
+              <Icon>edit</Icon>
             </ListItemIcon>
-            Copy
-          </MenuItem>
-
-          <MenuItem component="div">
-            <ListItemIcon>
-              <Icon>delete_forever</Icon>
-            </ListItemIcon>
-            Delete
+            Edit
           </MenuItem>
         </IconMenu>
       </ListItemSecondaryAction>
     </ListItem>
   }
+
+  makeActive = () => {
+    this.menu.closeMenuWithDelay()
+
+    this.props.setCurrent(this.props.name)
+      .then(this.props.refresh)
+  }
+
+  startEditing = () => {
+    this.menu.closeMenuWithDelay()
+
+    this.props.startEditing(this.props.name)
+  }
 }
+
+export default connect(null, actions)(MappingEntry)

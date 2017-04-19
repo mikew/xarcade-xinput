@@ -30,3 +30,4 @@ export {
 } from 'material-ui/Menu'
 
 export { default as IconMenu } from './IconMenu'
+export { default as UnmanagedTextField } from './UnmanagedTextField'

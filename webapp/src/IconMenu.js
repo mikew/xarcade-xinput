@@ -10,6 +10,12 @@ export default class IconMenu extends PureComponent {
     isMenuOpen: false,
   }
 
+  componentWillUnmount () {
+    if (this._closeTimeout) {
+      clearTimeout(this._closeTimeout)
+    }
+  }
+
   render () {
     const {
       icon,
@@ -38,9 +44,18 @@ export default class IconMenu extends PureComponent {
   }
 
   closeMenu = () => {
+    this._closeTimeout = null
     this.setState({
       menuAnchor: null,
       isMenuOpen: false,
     })
+  }
+
+  closeMenuWithDelay = () => {
+    if (this._closeTimeout) {
+      clearTimeout(this._closeTimeout)
+    }
+
+    this._closeTimeout = setTimeout(this.closeMenu, 200)
   }
 }
