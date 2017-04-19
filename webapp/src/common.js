@@ -6,6 +6,7 @@ export { default as Button } from 'material-ui/Button'
 export { default as TextField } from 'material-ui/TextField'
 export { default as Icon } from 'material-ui/Icon'
 export { default as IconButton } from 'material-ui/IconButton'
+export { default as Text } from 'material-ui/Text'
 
 export {
   Dialog,

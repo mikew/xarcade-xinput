@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   UnmanagedTextField,
+  Text,
   connect,
 } from './common'
 
@@ -69,7 +70,9 @@ class MappingEditor extends PureComponent {
       }}
     >
       <DialogTitle>
-        Edit "{this.props.currentEditing}"
+        <Text type="title">
+          Edit "{this.props.currentEditing}"
+        </Text>
       </DialogTitle>
       <DialogContent>
         {this.renderRenameDialog()}
