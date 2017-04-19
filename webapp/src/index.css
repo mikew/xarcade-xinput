@@ -6,7 +6,7 @@ td {
 }
 
 .monospace,
-.form-control.monospace
+.form-control.monospace,
 {
   font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
   /*font-size: 0.7rem;*/
@@ -15,6 +15,10 @@ td {
 .App {
   max-width: 600px;
   margin: auto;
+}
+
+[class*="MuiDialog-dialog"] {
+  width: 95% !important;
 }
 
 /*
