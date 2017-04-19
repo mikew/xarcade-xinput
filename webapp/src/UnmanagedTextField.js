@@ -4,20 +4,24 @@ import TextField from 'material-ui/TextField'
 export default class UnmanagedTextField extends PureComponent {
   TextField = null
 
-  static defaultProps = { }
+  static defaultProps = {
+    onChange () {},
+  }
 
   state = {
     value: null,
   }
 
+  /*
   componentDidMount () {
     this.setState({ value: this.props.defaultValue || '' })
   }
+  */
 
   /*
   componentWillReceiveProps (nextProps) {
     if (nextProps.defaultValue !== this.props.defaultValue) {
-      this.setState({ value: nextProps.defaultValue })
+      this.setState({ value: null })
     }
   }
   */
@@ -28,15 +32,20 @@ export default class UnmanagedTextField extends PureComponent {
       ...props,
     } = this.props
 
+    const value = this.state.value !== null
+      ? this.state.value
+      : defaultValue
+
     return <TextField
       {...props}
-      value={this.state.value || defaultValue || ''}
+      value={value}
       onChange={this.handleChange}
       ref={x => this.TextField = x}
     />
   }
 
   handleChange = (event) => {
-    this.setState({ value: event.target.value })
+    this.setState({ value: event.target.value || '' })
+    this.props.onChange(event)
   }
 }
