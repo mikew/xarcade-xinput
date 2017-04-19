@@ -10,8 +10,13 @@
     "react": "^15.5.4",
     "react-ace": "^4.2.1",
     "react-dom": "^15.5.4",
+    "react-redux": "^5.0.4",
     "react-scripts": "0.9.5",
-    "react-tap-event-plugin": "^2.0.1"
+    "react-tap-event-plugin": "^2.0.1",
+    "redux": "^3.6.0",
+    "redux-logger": "^3.0.1",
+    "redux-promise-middleware": "^4.2.0",
+    "redux-thunk": "^2.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
