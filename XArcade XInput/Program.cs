@@ -5,6 +5,7 @@
         static public RestServer RestServerInstance;
         static public bool IsDebug = false;
         static public bool ForceDefaultMapping = false;
+        static public bool ShouldOpenUI = true;
 
         static void Main (string[] args) {
             for (var i = 0; i < args.Length; i++) {
@@ -15,30 +16,21 @@
                 if (args[i] == "--default") {
                     ForceDefaultMapping = true;
                 }
+
+                if (args[i] == "--skip-ui") {
+                    ShouldOpenUI = false;
+                }
             }
 
             RestServerInstance = new RestServer();
             KeyboardMapperInstance = new KeyboardMapper();
             ControllerManagerInstance = new ControllerManager();
 
-            var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
-            var defaultMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "X-Arcade 2 Player Analog.json" });
-            var currentMappingPath = System.IO.Path.Combine(new string[] { appdir, "mappings", "current.json" });
-
-            if (!ForceDefaultMapping && System.IO.File.Exists(currentMappingPath)) {
-                defaultMappingPath = currentMappingPath;
-            }
-
-            System.Console.WriteLine($"Loading mapping from {defaultMappingPath}");
-            KeyboardMapperInstance.ParseMapping(System.IO.File.ReadAllText(defaultMappingPath));
-
             KeyboardMapperInstance.OnParse += (s, e) => {
                 if (ControllerManagerInstance.IsRunning) {
                     ControllerManagerInstance.Stop();
                     ControllerManagerInstance.Start();
                 }
-
-                System.IO.File.WriteAllText(currentMappingPath, KeyboardMapperInstance.CurrentMapping);
             };
 
             RestServerInstance.Start();

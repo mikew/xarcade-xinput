@@ -1,18 +1,23 @@
 ﻿using ScpDriverInterface;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace XArcade_XInput {
     class KeyboardMapper {
         public bool IsRunning = false;
-        public string CurrentMapping;
         public List<int> MappedControllerIndexes = new List<int>();
         Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
         Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
         public event System.EventHandler OnParse;
 
+        public string CurrentMappingName;
+        string DefaultMappingName = "X-Arcade 2 Player Analog";
+
         public KeyboardMapper () {
             KeyboardHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
+
+            LoadPreviousMapping();
         }
 
         public void Start () {
@@ -31,6 +36,90 @@ namespace XArcade_XInput {
             KeyboardHook.KeyDown -= KeyboardHook_KeyDown;
             KeyboardHook.KeyUp -= KeyboardHook_KeyUp;
             System.Console.WriteLine("Stopped KeyboardMapper");
+        }
+
+        void LoadPreviousMapping () {
+            var name = DefaultMappingName;
+
+            if (!Program.ForceDefaultMapping && File.Exists(GetMappingPath("CurrentMappingName"))) {
+                name = File.ReadAllText(GetMappingPath("CurrentMappingName")).Trim();
+            }
+
+            if (!DoesMappingExist(name)) {
+                name = DefaultMappingName;
+            }
+
+            SetCurrentMappingName(name);
+        }
+
+        public void SaveMapping (string name, string contents) {
+            name = SanitizeName(name);
+            var path = GetMappingPath($"{name}.json");
+
+            System.Console.WriteLine($"Saving mapping to {path}");
+            File.WriteAllText(path, contents);
+
+            if (name == CurrentMappingName) {
+                ParseMapping(contents);
+            }
+        }
+
+        string GetMappingPath (string part) {
+            return GetMappingPath(new string[] { part });
+        }
+
+        string GetMappingPath (string[] parts) {
+            var allParts = new List<string> {
+                System.AppDomain.CurrentDomain.BaseDirectory,
+                "mappings",
+            };
+
+            allParts.AddRange(parts);
+
+            return Path.Combine(allParts.ToArray());
+        }
+
+        public void SetCurrentMappingName (string name) {
+            if (!DoesMappingExist(name)) {
+                return;
+            }
+
+            name = SanitizeName(name);
+            var path = GetMappingPath($"{name}.json");
+
+            System.Console.WriteLine($"Loading mapping from {path}");
+            ParseMapping(File.ReadAllText(path));
+            CurrentMappingName = name;
+            File.WriteAllText(GetMappingPath("CurrentMappingName"), name);
+        }
+
+        public bool DoesMappingExist (string name) {
+            return File.Exists(GetMappingPath($"{SanitizeName(name)}.json"));
+        }
+
+        public static string SanitizeName (string name) {
+            if (string.IsNullOrEmpty(name)) {
+                return System.Guid.NewGuid().ToString();
+            }
+
+            var pattern = "[^0-9a-zA-Z\\-_]+";
+            var replacement = " ";
+            var rgx = new System.Text.RegularExpressions.Regex(pattern);
+
+            return rgx.Replace(name, replacement).Trim();
+        }
+
+        public Dictionary<string, string> GetAllMappings () {
+            var ret = new Dictionary<string, string>();
+
+            foreach (var f in Directory.GetFiles(GetMappingPath(""), "*.json")) {
+                var key = Path.GetFileNameWithoutExtension(f);
+                var value = File.ReadAllText(f).Trim();
+
+                ret.Add(key, value);
+            }
+
+            return ret;
         }
 
         static List<System.Windows.Forms.Keys> keysDown = new List<System.Windows.Forms.Keys>();
@@ -76,7 +165,7 @@ namespace XArcade_XInput {
             KeyboardMappings.Clear();
 
             foreach (var pair in mapping) {
-                System.Console.WriteLine($"Loadding mapping for {pair.Key} ...");
+                System.Console.WriteLine($"Loading mapping for {pair.Key} ...");
 
                 var shorthand = pair.Value as object[];
                 var controllerIndex = (int)shorthand[0];
@@ -125,7 +214,6 @@ namespace XArcade_XInput {
                 }
             }
 
-            CurrentMapping = mappingJsonContents;
             OnParse?.Invoke(this, new System.EventArgs());
         }
 

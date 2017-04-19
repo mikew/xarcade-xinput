@@ -9,11 +9,7 @@ namespace XArcade_XInput {
         Grapevine.Server.RestServer _server;
         int Port = 32123;
 
-        public void Start () {
-            if (IsRunning) {
-                return;
-            }
-
+        public RestServer () {
             var appdir = System.AppDomain.CurrentDomain.BaseDirectory;
             var publicPath = System.IO.Path.Combine(new string[] { appdir, "webapp" });
 
@@ -24,9 +20,19 @@ namespace XArcade_XInput {
             if (Program.IsDebug) {
                 _server.LogToConsole();
             }
+        }
+
+        public void Start () {
+            if (IsRunning) {
+                return;
+            }
 
             _server.Start();
-            System.Diagnostics.Process.Start($"http://localhost:{Port}");
+
+            if (Program.ShouldOpenUI) {
+                System.Diagnostics.Process.Start($"http://localhost:{Port}");
+            }
+
             IsRunning = true;
         }
 
@@ -50,6 +56,11 @@ namespace XArcade_XInput {
             ctx.Response.ContentType = ContentType.JSON;
             var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
             SendTextResponse(ctx, ser.Serialize(jsonObject));
+        }
+
+        static public Dictionary<string, object> ParseJson (string json) {
+            var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
+            return ser.DeserializeObject(json) as Dictionary<string, object>;
         }
     }
 
@@ -122,7 +133,8 @@ namespace XArcade_XInput {
             RestServer.SetCORSHeaders(ctx);
 
             try {
-                Program.KeyboardMapperInstance.ParseMapping(ctx.Request.Payload);
+                var json = RestServer.ParseJson(ctx.Request.Payload);
+                Program.KeyboardMapperInstance.SaveMapping((string)json["name"], (string)json["mapping"]);
                 RestServer.CloseResponse(ctx);
             } catch (System.Exception e) {
                 ctx.Response.StatusCode = HttpStatusCode.InternalServerError;
@@ -138,8 +150,26 @@ namespace XArcade_XInput {
         public IHttpContext KeyboardGetMapping (IHttpContext ctx) {
             RestServer.SetCORSHeaders(ctx);
             RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
-                { "mapping", Program.KeyboardMapperInstance.CurrentMapping },
+                { "currentMapping", Program.KeyboardMapperInstance.CurrentMappingName },
+                { "mappings", Program.KeyboardMapperInstance.GetAllMappings() },
             });
+
+            return ctx;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/keyboard/mapping/current")]
+        public IHttpContext KeyboardSetCurrentName (IHttpContext ctx) {
+            try {
+                Program.KeyboardMapperInstance.SetCurrentMappingName(ctx.Request.Payload);
+                RestServer.SetCORSHeaders(ctx);
+                RestServer.CloseResponse(ctx);
+            } catch (System.Exception e) {
+                ctx.Response.StatusCode = HttpStatusCode.InternalServerError;
+                RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
+                    { "error", e.Message },
+                });
+            }
+
 
             return ctx;
         }
