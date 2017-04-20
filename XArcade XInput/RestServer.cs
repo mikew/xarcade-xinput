@@ -2,6 +2,7 @@
 using Grapevine.Server.Attributes;
 using Grapevine.Shared;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace XArcade_XInput {
     class RestServer {
@@ -129,6 +130,17 @@ namespace XArcade_XInput {
             return ctx;
         }
 
+        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/keyboard/mapping")]
+        public IHttpContext KeyboardGetMapping (IHttpContext ctx) {
+            RestServer.SetCORSHeaders(ctx);
+            RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
+                { "currentMapping", Program.KeyboardMapperInstance.CurrentMappingName },
+                { "mappings", Program.KeyboardMapperInstance.GetAllMappings() },
+            });
+
+            return ctx;
+        }
+
         [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/keyboard/mapping")]
         public IHttpContext KeyboardSetMapping (IHttpContext ctx) {
             RestServer.SetCORSHeaders(ctx);
@@ -147,13 +159,32 @@ namespace XArcade_XInput {
             return ctx;
         }
 
-        [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/api/keyboard/mapping")]
-        public IHttpContext KeyboardGetMapping (IHttpContext ctx) {
+        [RestRoute(HttpMethod = HttpMethod.OPTIONS, PathInfo = "/api/keyboard/mapping")]
+        public IHttpContext KeyboardMappingOptions (IHttpContext ctx) {
+            var validMethods = new HttpMethod[] {
+                HttpMethod.GET,
+                HttpMethod.POST,
+                HttpMethod.DELETE,
+                HttpMethod.OPTIONS,
+            };
+            ctx.Response.Headers["Access-Control-Allow-Methods"] = string.Join(", ", validMethods.Select(x => x.ToString()));
             RestServer.SetCORSHeaders(ctx);
-            RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
-                { "currentMapping", Program.KeyboardMapperInstance.CurrentMappingName },
-                { "mappings", Program.KeyboardMapperInstance.GetAllMappings() },
-            });
+            RestServer.CloseResponse(ctx);
+            return ctx;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.DELETE, PathInfo = "/api/keyboard/mapping")]
+        public IHttpContext KeyboardDeleteMapping (IHttpContext ctx) {
+            try {
+                Program.KeyboardMapperInstance.DeleteMapping(ctx.Request.Payload);
+                RestServer.SetCORSHeaders(ctx);
+                RestServer.CloseResponse(ctx);
+            } catch (System.Exception e) {
+                ctx.Response.StatusCode = HttpStatusCode.InternalServerError;
+                RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
+                    { "error", e.Message },
+                });
+            }
 
             return ctx;
         }
@@ -171,6 +202,22 @@ namespace XArcade_XInput {
                 });
             }
 
+            return ctx;
+        }
+
+        [RestRoute(HttpMethod = HttpMethod.POST, PathInfo = "/api/keyboard/mapping/rename")]
+        public IHttpContext KeyboardRenameMapping (IHttpContext ctx) {
+            try {
+                var json = RestServer.ParseJson(ctx.Request.Payload);
+                Program.KeyboardMapperInstance.RenameMapping((string)json["name"], (string)json["newName"]);
+                RestServer.SetCORSHeaders(ctx);
+                RestServer.CloseResponse(ctx);
+            } catch (System.Exception e) {
+                ctx.Response.StatusCode = HttpStatusCode.InternalServerError;
+                RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
+                    { "error", e.Message },
+                });
+            }
 
             return ctx;
         }

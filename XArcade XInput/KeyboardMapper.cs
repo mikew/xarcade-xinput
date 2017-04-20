@@ -53,6 +53,10 @@ namespace XArcade_XInput {
         }
 
         public void SaveMapping (string name, string contents) {
+            if (name == DefaultMappingName) {
+                return;
+            }
+
             name = SanitizeName(name);
             var path = GetMappingPath($"{name}.json");
 
@@ -77,6 +81,32 @@ namespace XArcade_XInput {
             allParts.AddRange(parts);
 
             return Path.Combine(allParts.ToArray());
+        }
+
+        public void DeleteMapping (string name) {
+            if (name == DefaultMappingName) {
+                return;
+            }
+
+            name = SanitizeName(name);
+            File.Delete(GetMappingPath($"{name}.json"));
+            if (name == CurrentMappingName) {
+                SetCurrentMappingName(DefaultMappingName);
+            }
+        }
+
+        public void RenameMapping (string name, string newName) {
+            if (name == DefaultMappingName) {
+                return;
+            }
+
+            name = SanitizeName(name);
+            newName = SanitizeName(newName);
+            File.Move(GetMappingPath($"{name}.json"), GetMappingPath($"{newName}.json"));
+
+            if (name == CurrentMappingName) {
+                CurrentMappingName = newName;
+            }
         }
 
         public void SetCurrentMappingName (string name) {
