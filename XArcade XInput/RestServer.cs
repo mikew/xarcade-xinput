@@ -83,6 +83,7 @@ namespace XArcade_XInput {
             RestServer.SendJsonResponse(ctx, new Dictionary<string, object> {
                 { "isControllerRunning", Program.ControllerManagerInstance.IsRunning },
                 { "isKeyboardRunning", Program.KeyboardMapperInstance.IsRunning },
+                { "hostname", System.Net.Dns.GetHostName() },
             });
 
             return ctx;

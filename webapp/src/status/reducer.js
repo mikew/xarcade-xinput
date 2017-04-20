@@ -5,6 +5,7 @@ import * as actions from './actions'
 const initialState = {
   isKeyboardRunning: false,
   isControllerRunning: false,
+  hostname: null,
 }
 
 export default createReducer (initialState, {

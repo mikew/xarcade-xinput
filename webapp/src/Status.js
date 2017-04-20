@@ -16,9 +16,13 @@ class Status extends PureComponent {
 
   render () {
     const isRunning = this.props.isKeyboardRunning && this.props.isControllerRunning
-    const heading = isRunning
-      ? 'Running'
+    let heading = isRunning
+      ? `Running`
       : 'Not Running'
+
+    if (this.props.hostname) {
+      heading = `${heading} on ${this.props.hostname}`
+    }
 
     return <div className="Status">
       <ListSubheader>Status: {heading}</ListSubheader>
