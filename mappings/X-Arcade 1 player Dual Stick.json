@@ -18,14 +18,14 @@
     "X": [0, "RightTrigger"],
 
 
-    
+
     "W": [0, "A"],
     "E": [0, "B"],
     "A": [0, "X"],
     "S": [0, "Y"],
 
-    "2": [0, "Start"],
-    "4": [0, "Back"],
+    "D2": [0, "Start"],
+    "D4": [0, "Back"],
     "Oem6": [0, "LeftBumper"],
     "OemCloseBrackets": [0, "LeftBumper"],
     "Q": [0, "RightBumper"],
