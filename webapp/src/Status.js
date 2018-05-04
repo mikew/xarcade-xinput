@@ -27,15 +27,9 @@ class Status extends PureComponent {
     return <div className="Status">
       <ListSubheader>Status: {heading}</ListSubheader>
       <LabelSwitch
-        label="Keyboard"
-        checked={this.props.isKeyboardRunning}
-        onChange={(_, shouldEnable) => this.props.setKeyboardmapper(shouldEnable)}
-      />
-      <br />
-      <LabelSwitch
-        label="Controllers"
-        checked={this.props.isControllerRunning}
-        onChange={(_, shouldEnable) => this.props.setControllermanager(shouldEnable)}
+        label="Enabled"
+        checked={isRunning}
+        onChange={(_, shouldEnable) => this.props.setAll(shouldEnable)}
       />
       <br />
       <Button onClick={this.props.restartAll} raised>Restart</Button>

@@ -32,11 +32,14 @@ export function setControllermanager (shouldEnable) {
   }
 }
 
+export function setAll (shouldEnable) { return (dispatch, getState) => {
+  return dispatch(setKeyboardmapper(shouldEnable))
+    .then(dispatch(setControllermanager(shouldEnable)))
+} }
+
 export function restartAll () { return (dispatch, getState) => {
-  return dispatch(setKeyboardmapper(false))
-    .then(() => dispatch(setControllermanager(false)))
-    .then(() => dispatch(setKeyboardmapper(true)))
-    .then(() => dispatch(setControllermanager(true)))
+  return dispatch(setAll(false))
+    .then(() => dispatch(setAll(true)))
 } }
 
 export function refresh () {
