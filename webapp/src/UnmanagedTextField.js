@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react'
 import TextField from 'material-ui/TextField'
 
 export default class UnmanagedTextField extends PureComponent {
+  TextField = null
+
   static defaultProps = {
     onChange () {},
   }
@@ -38,6 +40,7 @@ export default class UnmanagedTextField extends PureComponent {
       {...props}
       value={value}
       onChange={this.handleChange}
+      ref={x => this.TextField = x}
     />
   }
 
