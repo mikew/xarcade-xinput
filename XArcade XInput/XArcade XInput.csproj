@@ -79,7 +79,7 @@
 
   <ItemGroup>
     <OtherFiles Include="..\README.md"/>
-    <OtherFiles Include="..\install.bat"/>
+    <OtherFiles Include="..\Install Driver.exe"/>
   </ItemGroup>
 
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -7,7 +7,7 @@ Technically, turns any keyboard input into 360 Controllers, but the default is t
 ## Installation
 
 1. [Download the latest release](https://github.com/mikew/xarcade-xinput/releases/latest)
-1. Right-click `install.bat` and press `Run as administrator`.
+1. Double-click `Install Driver.exe`.
 1. Run `XArcade XInput.exe`
 
 ## Manual Installation

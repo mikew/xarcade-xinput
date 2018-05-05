@@ -242,5 +242,5 @@ ModelManifest.xml
 .fake/
 
 !Scp\ Driver\ Installer/**/*
-install.exe
+Install\ Driver.exe
 vendor/settings
