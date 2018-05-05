@@ -1,12 +1,13 @@
 @echo off
 
-del /F /S /Q webapp\build\
+call script\create-install-exe.bat
 
 REM Build webapp
-cd webapp\
-call yarn install
-call yarn run build
-cd ..
+REM del /F /S /Q webapp\build\
+REM cd webapp\
+REM call yarn install
+REM call yarn run build
+REM cd ..
 
 REM "Clean" isn't a total clean.
 del /F /S /Q "XArcade XInput"\bin
@@ -14,4 +15,3 @@ del /F /S /Q "XArcade XInput"\bin
 REM Build Project
 nuget restore
 MSBuild.exe "XArcade XInput".sln /t:Clean,Build /p:Configuration=Release
-
