@@ -3,11 +3,11 @@
 call script\create-install-exe.bat
 
 REM Build webapp
-REM del /F /S /Q webapp\build\
-REM cd webapp\
-REM call yarn install
-REM call yarn run build
-REM cd ..
+del /F /S /Q webapp\build\
+pushd webapp\
+call yarn install
+call yarn run build
+popd
 
 REM "Clean" isn't a total clean.
 del /F /S /Q "XArcade XInput"\bin
