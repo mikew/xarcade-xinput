@@ -3,11 +3,14 @@
 call script\create-install-exe.bat
 
 REM Build webapp
-del /F /S /Q webapp\build\
+rd /S /Q webapp\build\
 pushd webapp\
 call yarn install
 call yarn run build
 popd
+
+REM Grab Scp Driver Installer
+call script\get-scp-driver-installer.bat
 
 REM "Clean" isn't a total clean.
 del /F /S /Q "XArcade XInput"\bin

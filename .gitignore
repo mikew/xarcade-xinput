@@ -244,3 +244,4 @@ ModelManifest.xml
 !Scp\ Driver\ Installer/**/*
 Install\ Driver.exe
 vendor/settings
+Scp Driver Installer/
