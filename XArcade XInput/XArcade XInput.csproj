@@ -81,6 +81,12 @@
     <OtherFiles Include="..\README.md"/>
     <OtherFiles Include="..\XArcade XInput Interface.url"/>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Install Driver\Install Driver.csproj">
+      <Project>{6c663b31-ed95-43ca-9cca-d2349f8e491e}</Project>
+      <Name>Install Driver</Name>
+    </ProjectReference>
+  </ItemGroup>
 
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XArcade XInput", "XArcade XInput\XArcade XInput.csproj", "{2A7F171B-F9E0-42DE-B116-9F9FF812CAAA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C663B31-ED95-43CA-9CCA-D2349F8E491E} = {6C663B31-ED95-43CA-9CCA-D2349F8E491E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Install Driver", "Install Driver\Install Driver.csproj", "{6C663B31-ED95-43CA-9CCA-D2349F8E491E}"
 EndProject
