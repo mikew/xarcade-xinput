@@ -1,5 +1,7 @@
 # X-Arcade XInput
 
+[![][appveyor badge]][appveyor]
+
 Turns an X-Arcade joystick into 360 Controllers.
 
 Technically, turns any keyboard input into 360 Controllers, but the default is to support X-Arcade joysticks in Mode 1.
@@ -63,3 +65,6 @@ Or you can search the internet, and find any combinations like:
 - Keyboard -> Headsoft VJoy -> x360ce -> ViGEm
 
 That's a lot of indirection. There's none of that here. Just Keyboard to XInput.
+
+[appveyor]: https://ci.appveyor.com/project/mikew/xarcade-xinput
+[appveyor badge]: https://ci.appveyor.com/api/projects/status/github/mikew/xarcade-xinput?svg=true&branch=master
