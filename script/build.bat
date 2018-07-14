@@ -1,7 +1,5 @@
 @echo off
 
-call script\create-install-exe.bat
-
 REM Build webapp
 rd /S /Q webapp\build\
 pushd webapp\

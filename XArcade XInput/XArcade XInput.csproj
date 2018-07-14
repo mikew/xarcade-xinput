@@ -79,7 +79,6 @@
 
   <ItemGroup>
     <OtherFiles Include="..\README.md"/>
-    <OtherFiles Include="..\Install Driver.exe"/>
     <OtherFiles Include="..\XArcade XInput Interface.url"/>
   </ItemGroup>
 
