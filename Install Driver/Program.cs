@@ -3,10 +3,37 @@
         static void Main (string[] args) {
             InstallDriver();
             SetupFirewall();
-            WaitAndExit(0);
         }
 
-        static System.Diagnostics.Process RunCommand(System.Diagnostics.ProcessStartInfo startInfo, bool allowFail = false) {
+        static void InstallDriver() {
+            var driverInstallerDir = System.IO.Path.Combine(
+                        System.Environment.CurrentDirectory,
+                        "Scp Driver Installer"
+                );
+
+            RunCommand(new System.Diagnostics.ProcessStartInfo {
+                FileName = System.IO.Path.Combine(
+                        driverInstallerDir,
+                        "ScpDriverInstaller.exe"
+                        ),
+                Arguments = "--install --quiet",
+                WorkingDirectory = driverInstallerDir,
+            });
+        }
+
+        static void SetupFirewall() {
+            RunCommand(new System.Diagnostics.ProcessStartInfo {
+                FileName = "netsh",
+                Arguments = "advfirewall firewall add rule name=\"XArcade XInput\" dir=in action=allow protocol=TCP localport=32123",
+            }, true);
+
+            RunCommand(new System.Diagnostics.ProcessStartInfo {
+                FileName = "netsh",
+                Arguments = "http add urlacl url=http://+:32123/ user=Everyone",
+            }, true);
+        }
+
+        static System.Diagnostics.Process RunCommand (System.Diagnostics.ProcessStartInfo startInfo, bool allowFail = false) {
             System.Console.WriteLine($"Running '{startInfo.FileName} {startInfo.Arguments}'");
 
             startInfo.UseShellExecute = false;
@@ -37,34 +64,6 @@
             }
 
             return proc;
-        }
-
-        static void InstallDriver() {
-            var driverInstallerDir = System.IO.Path.Combine(
-                        System.Environment.CurrentDirectory,
-                        "Scp Driver Installer"
-                );
-
-            RunCommand(new System.Diagnostics.ProcessStartInfo {
-                FileName = System.IO.Path.Combine(
-                        driverInstallerDir,
-                        "ScpDriverInstaller.exe"
-                        ),
-                Arguments = "--install --quiet",
-                WorkingDirectory = driverInstallerDir,
-            });
-        }
-
-        static void SetupFirewall() {
-            RunCommand(new System.Diagnostics.ProcessStartInfo {
-                FileName = "netsh",
-                Arguments = "advfirewall firewall add rule name=\"XArcade XInput\" dir=in action=allow protocol=TCP localport=32123",
-            }, true);
-
-            RunCommand(new System.Diagnostics.ProcessStartInfo {
-                FileName = "netsh",
-                Arguments = "http add urlacl url=http://+:32123/ user=Everyone",
-            }, true);
         }
 
         static void WaitAndExit(int exitCode) {
