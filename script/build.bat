@@ -12,6 +12,7 @@ call script\get-scp-driver-installer.bat
 
 REM "Clean" isn't a total clean.
 del /F /S /Q "XArcade XInput"\bin
+rd /S /Q "XArcade XInput"\bin
 
 REM Build Project
 nuget restore

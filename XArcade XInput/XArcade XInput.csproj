@@ -68,18 +68,17 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <WebappFiles Include="..\webapp\build\**\*.*" Exclude="..\webapp\build\**\*.map"/>
+    <WebappFiles Include="..\webapp\build\**\*.*" Exclude="..\webapp\build\**\*.map" />
   </ItemGroup>
   <ItemGroup>
-    <MappingFiles Include="..\mappings\**\*.*"/>
+    <MappingFiles Include="..\mappings\**\*.*" />
   </ItemGroup>
   <ItemGroup>
-    <ScpDriverFiles Include="..\Scp Driver Installer\**\*.*"/>
+    <ScpDriverFiles Include="..\Scp Driver Installer\**\*.*" />
   </ItemGroup>
-
   <ItemGroup>
-    <OtherFiles Include="..\README.md"/>
-    <OtherFiles Include="..\XArcade XInput Interface.url"/>
+    <OtherFiles Include="..\README.md" />
+    <OtherFiles Include="..\XArcade XInput Interface.url" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Install Driver\Install Driver.csproj">
@@ -87,7 +86,6 @@
       <Name>Install Driver</Name>
     </ProjectReference>
   </ItemGroup>
-
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -97,8 +95,8 @@
   -->
   <Target Name="AfterBuild">
     <Copy SourceFiles="@(MappingFiles)" DestinationFolder="$(OutDir)mappings\%(RecursiveDir)" />
-    <Copy SourceFiles="@(WebappFiles)" DestinationFolder="$(OutDir)webapp\%(RecursiveDir)"/>
-    <Copy SourceFiles="@(ScpDriverFiles)" DestinationFolder="$(OutDir)Scp Driver Installer\%(RecursiveDir)"/>
-    <Copy SourceFiles="@(OtherFiles)" DestinationFolder="$(OutDir)"/>
+    <Copy SourceFiles="@(WebappFiles)" DestinationFolder="$(OutDir)webapp\%(RecursiveDir)" />
+    <Copy SourceFiles="@(ScpDriverFiles)" DestinationFolder="$(OutDir)Scp Driver Installer\%(RecursiveDir)" />
+    <Copy SourceFiles="@(OtherFiles)" DestinationFolder="$(OutDir)" />
   </Target>
 </Project>
