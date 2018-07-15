@@ -8,7 +8,6 @@ export interface State {
   mappingNames: string[]
   all: {[mappingName: string]: string}
   currentEditing: string | null
-  editingStartedAt: Date | null
 }
 
 const initialState: State = {
@@ -16,7 +15,6 @@ const initialState: State = {
   mappingNames: [],
   all: {},
   currentEditing: null,
-  editingStartedAt: null,
 }
 
 export const reducer = createReducer(initialState, {
@@ -50,6 +48,5 @@ export const reducer = createReducer(initialState, {
   ) => ({
     ...state,
     currentEditing: action.payload,
-    editingStartedAt: new Date(),
   }),
 })

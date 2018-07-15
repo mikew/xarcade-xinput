@@ -15,6 +15,7 @@ import {
 import IconMenu from '../util/IconMenu'
 
 import * as actions from './actions'
+import RenameMapping, { Props as RenameMappingProps } from './RenameMapping'
 
 interface Props {
   isActive: boolean
@@ -59,12 +60,11 @@ class MappingEntry extends React.PureComponent<Props & AppDispatchProps> {
             Edit
           </MenuItem>
 
-          <MenuItem component="div" onClick={this.startRename}>
-            <ListItemIcon>
-              <Icon>label</Icon>
-            </ListItemIcon>
-            Rename
-          </MenuItem>
+          <RenameMapping
+            mappingName={this.props.name}
+            onSave={this.handleRename}
+            render={this.renderRename}
+          />
 
           <MenuItem component="div" onClick={this.requestDelete}>
             <ListItemIcon>
@@ -85,6 +85,22 @@ class MappingEntry extends React.PureComponent<Props & AppDispatchProps> {
     return this.props.dispatch(actions.refresh())
   }
 
+  renderRename: RenameMappingProps['render'] = (props) => {
+    return <MenuItem component="div" onClick={props.showDialog}>
+      <ListItemIcon>
+        <Icon>label</Icon>
+      </ListItemIcon>
+      Rename
+    </MenuItem>
+  }
+
+  handleRename: RenameMappingProps['onSave'] = async (newName) => {
+    this.menu.current!.closeMenuWithDelay()
+    await this.props.dispatch(actions.renameMapping(this.props.name, newName))
+
+    return this.props.dispatch(actions.refresh())
+  }
+
   startEditing = () => {
     this.menu.current!.closeMenuWithDelay()
 
@@ -98,19 +114,6 @@ class MappingEntry extends React.PureComponent<Props & AppDispatchProps> {
 
     this.menu.current!.closeMenuWithDelay()
     await this.props.dispatch(actions.deleteMapping(this.props.name))
-
-    return this.props.dispatch(actions.refresh())
-  }
-
-  startRename = async () => {
-    const newName = prompt(`New name for ${this.props.name}`, this.props.name)
-
-    if (newName == null) {
-      return
-    }
-
-    this.menu.current!.closeMenuWithDelay()
-    await this.props.dispatch(actions.renameMapping(this.props.name, newName))
 
     return this.props.dispatch(actions.refresh())
   }

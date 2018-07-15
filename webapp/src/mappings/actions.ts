@@ -30,7 +30,7 @@ export const setCurrent = (name: string) => ({
   meta: name,
 })
 
-export const startEditing = createAction<string>(constants.startEditing)
+export const startEditing = createAction<string | null>(constants.startEditing)
 
 export const deleteMapping = (name: string) => ({
   type: constants.deleteMapping,

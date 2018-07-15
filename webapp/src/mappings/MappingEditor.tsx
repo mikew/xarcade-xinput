@@ -11,7 +11,6 @@ import DialogContent from '@material-ui/core/DialogContent/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle/DialogTitle'
 import Icon from '@material-ui/core/Icon/Icon'
-import TextField, { TextFieldProps } from '@material-ui/core/TextField/TextField'
 import * as React from 'react'
 
 import {
@@ -20,26 +19,16 @@ import {
 } from '../commonRedux'
 
 import * as actions from './actions'
+import RenameMapping, { Props } from './RenameMapping'
 import * as selectors from './selectors'
 
 interface ReduxProps {
-  editingStartedAt: ReturnType<typeof selectors.editingStartedAt>
   currentEditing: ReturnType<typeof selectors.currentEditing>
   mapping: ReturnType<typeof selectors.currentEditingMapping>
 }
 
-interface State {
-  isOpen: boolean
-  isRenameDialogOpen: boolean
-}
-
-class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps, State> {
+class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps> {
   aceEditor = React.createRef<AceEditor>()
-  renameInput = React.createRef<HTMLInputElement>()
-
-  renameInputProps: TextFieldProps['inputProps'] = {
-    ref: this.renameInput,
-  }
 
   aceEditorProps: AceEditorProps['editorProps'] = {
     $blockScrolling: true,
@@ -49,36 +38,17 @@ class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps, S
     fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace',
   }
 
-  state: State = {
-    isOpen: false,
-    isRenameDialogOpen: false,
-  }
-
-  componentDidUpdate (prevProps: ReduxProps) {
-    if (prevProps.editingStartedAt !== this.props.editingStartedAt) {
-      this.setState({ isOpen: true })
-    }
-  }
-
   render () {
     return <Dialog
       fullWidth
       maxWidth="sm"
-      open={this.state.isOpen}
+      open={this.props.currentEditing !== null}
       onClose={this.handleClose}
-      onExited={() => {
-        // HACK Reset overflow / padding because material-ui ain't
-        setTimeout(() => {
-          document.body.style.overflow = ''
-          document.body.style.paddingRight = ''
-        }, 300)
-      }}
     >
       <DialogTitle>
         Edit "{this.props.currentEditing}"
       </DialogTitle>
       <DialogContent>
-        {this.renderRenameDialog()}
         <DialogContentText>
           <Button
             href="https://github.com/mikew/xarcade-xinput/blob/master/README.md#mappings"
@@ -92,18 +62,17 @@ class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps, S
           theme="tomorrow_night_eighties"
           width="100%"
           editorProps={this.aceEditorProps}
-          value={this.props.mapping || ''}
+          value={this.props.mapping || undefined}
           ref={this.aceEditor}
           setOptions={this.aceEditorSetOptions}
         />
       </DialogContent>
       <DialogActions>
-        <Button
-          color="secondary"
-          onClick={this.openRenameDialog}
-        >
-          <Icon>content_copy</Icon> Save As New
-        </Button>
+        <RenameMapping
+          mappingName={this.props.currentEditing}
+          onSave={this.handleRename}
+          render={this.renderRenameButton}
+        />
         <Button
           color="primary"
           variant="raised"
@@ -115,58 +84,25 @@ class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps, S
     </Dialog>
   }
 
-  renderRenameDialog () {
-    const defaultName = `${this.props.currentEditing} - ${Math.random().toString(16).substr(2)}`
-
-    return <Dialog
-      fullWidth
-      open={this.state.isRenameDialogOpen}
+  renderRenameButton: Props['render'] = (props) => {
+    return <Button
+      color="secondary"
+      onClick={props.showDialog}
     >
-      <DialogTitle>
-        Enter a new name
-      </DialogTitle>
-      <DialogContent>
-        <TextField
-          fullWidth
-          defaultValue={defaultName}
-          inputProps={this.renameInputProps}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={this.handleRenameDialogClose}>Cancel</Button>
-        <Button
-          color="primary"
-          variant="raised"
-          onClick={this.saveWithRename}
-        >
-          <Icon>save</Icon> Continue
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <Icon>content_copy</Icon> Save As New
+    </Button>
+  }
+
+  handleRename: Props['onSave'] = (newName) => {
+    this._save(newName)
   }
 
   handleClose = () => {
-    this.setState({ isOpen: false })
-  }
-
-  handleRenameDialogClose = () => {
-    this.setState({ isRenameDialogOpen: false })
-  }
-
-  openRenameDialog = () => {
-    this.setState({ isRenameDialogOpen: true })
+    this.props.dispatch(actions.startEditing(null))
   }
 
   save = () => {
     this._save()
-  }
-
-  saveWithRename = () => {
-    if (!this.renameInput.current) {
-      return
-    }
-
-    this._save(this.renameInput.current.value)
   }
 
   _save = async (name?: string, mapping?: string) => {
@@ -188,13 +124,11 @@ class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps, S
 
     await this.props.dispatch(actions.saveMapping(name, mapping))
     await this.props.dispatch(actions.refresh())
-    this.handleRenameDialogClose()
     this.handleClose()
   }
 }
 
 export default connect<ReduxProps, {}, AppDispatchProps>((state) => ({
-  editingStartedAt: selectors.editingStartedAt(state),
   currentEditing: selectors.currentEditing(state),
   mapping: selectors.currentEditingMapping(state),
 }))(MappingEditor)
