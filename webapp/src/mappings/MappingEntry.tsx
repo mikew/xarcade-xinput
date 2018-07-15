@@ -37,7 +37,14 @@ class MappingEntry extends React.PureComponent<Props & AppDispatchProps> {
       {icon}
       <ListItemText primary={this.props.name} secondary="Created 3 days ago" />
       <ListItemSecondaryAction>
-        <IconMenu icon="more_vert" ref={this.menu}>
+        <IconMenu
+          icon="more_vert"
+          ref={this.menu}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
           <MenuItem component="div" onClick={this.makeActive}>
             <ListItemIcon>
               <Icon>check_circle</Icon>
