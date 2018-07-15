@@ -1,22 +1,23 @@
 import Icon from '@material-ui/core/Icon/Icon'
 import IconButton from '@material-ui/core/IconButton/IconButton'
-import Menu from '@material-ui/core/Menu/Menu'
+import Menu, { MenuProps } from '@material-ui/core/Menu/Menu'
 import * as React from 'react'
+import { Omit } from 'react-redux'
 
-interface Props {
+interface Props extends Omit<MenuProps, 'open' | 'anchorEl' | 'onClose'> {
   icon: string
 }
 
 interface State {
-  menuAnchor: HTMLElement | null
   isMenuOpen: boolean
 }
 
 export default class IconMenu extends React.PureComponent<Props, State> {
   state: State = {
-    menuAnchor: null,
     isMenuOpen: false,
   }
+
+  button = React.createRef<HTMLButtonElement>()
 
   _closeTimeout: NodeJS.Timer | null
 
@@ -31,18 +32,21 @@ export default class IconMenu extends React.PureComponent<Props, State> {
       icon,
       children,
       // tslint:disable-next-line:trailing-comma
-      ...props
+      ...menuProps
     } = this.props
 
     return <div>
-      <IconButton onClick={this.openMenu}>
+      <IconButton
+      buttonRef={this.button}
+      onClick={this.openMenu}
+      >
         <Icon>{icon}</Icon>
       </IconButton>
       <Menu
         open={this.state.isMenuOpen}
-        anchorEl={this.state.menuAnchor || undefined}
+        anchorEl={this.button.current || undefined}
         onClose={this.closeMenu}
-        {...props}
+        {...menuProps}
       >
         {children}
       </Menu>
@@ -51,7 +55,6 @@ export default class IconMenu extends React.PureComponent<Props, State> {
 
   openMenu = (event: React.MouseEvent<HTMLElement>) => {
     this.setState({
-      menuAnchor: event.currentTarget,
       isMenuOpen: true,
     })
   }
@@ -59,7 +62,6 @@ export default class IconMenu extends React.PureComponent<Props, State> {
   closeMenu = () => {
     this._closeTimeout = null
     this.setState({
-      menuAnchor: null,
       isMenuOpen: false,
     })
   }
