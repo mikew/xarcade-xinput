@@ -9,7 +9,3 @@ td {
   max-width: 600px;
   margin: auto;
 }
-
-[class*="MuiDialog-dialog"] {
-  width: 95% !important;
-}

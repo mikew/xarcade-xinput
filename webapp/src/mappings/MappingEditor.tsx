@@ -63,6 +63,7 @@ class MappingEditor extends React.PureComponent<ReduxProps & AppDispatchProps, S
   render () {
     return <Dialog
       fullWidth
+      maxWidth="sm"
       open={this.state.isOpen}
       onClose={this.handleClose}
       onExited={() => {
