@@ -1,8 +1,8 @@
 import {
+  AnyAction,
   applyMiddleware,
   createStore as _createStore,
   DeepPartial,
-  Store,
 } from 'redux'
 import reduxAsyncPayload from 'redux-async-payload'
 
@@ -18,13 +18,11 @@ function getRootReducer() {
 }
 
 export default function createStore(initialState?: DeepPartial<RootStore>) {
-  // Type errors came in after upgrading to redux@4 + typescript@2.8.
-  // Now a cast to Store is needed.
-  const store = _createStore(
+  const store = _createStore<RootStore, AnyAction, {}, {}>(
     getRootReducer(),
     initialState || {},
     applyMiddleware(...middleware),
-  ) as Store<RootStore>
+  )
 
   if (module.hot) {
     module.hot.accept('./rootReducer', () => {

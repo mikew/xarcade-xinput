@@ -67,7 +67,6 @@ export default class RenameMapping extends React.PureComponent<Props, State> {
         </DialogActions>
       </Dialog>
     </React.Fragment>
-
   }
 
   showDialog = () => {
