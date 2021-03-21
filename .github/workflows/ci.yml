@@ -13,22 +13,45 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Setup nuget
-      uses: nuget/setup-nuget@v1
+      - name: Setup nuget
+        uses: nuget/setup-nuget@v1
 
-    - name: build
-      run: script\build.bat
+      - name: build
+        run: script\build.bat
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: xarcade-xinput
-        path: XArcade XInput\bin\Release
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: XArcade XInput\bin\Release
+
+  deploy:
+    needs:
+      - build
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Download build
+        if: endsWith(github.ref, '/github-actions')
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: build
+
+      - name: Release
+        if: endsWith(github.ref, '/github-actions')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
