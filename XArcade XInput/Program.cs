@@ -6,6 +6,7 @@
         static public bool IsDebug = false;
         static public bool ForceDefaultMapping = false;
         static public bool ShouldOpenUI = true;
+        static public string InitialMappingName;
 
         static void Main (string[] args) {
             for (var i = 0; i < args.Length; i++) {
@@ -20,6 +21,11 @@
                 if (args[i] == "--skip-ui") {
                     ShouldOpenUI = false;
                 }
+
+                if (args[i] == "--mapping") {
+                    InitialMappingName = args[i + 1];
+                    i++;
+                }  
             }
 
             RestServerInstance = new RestServer();

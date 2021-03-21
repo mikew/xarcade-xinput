@@ -39,10 +39,18 @@ namespace XArcade_XInput {
         }
 
         void LoadPreviousMapping () {
-            var name = DefaultMappingName;
+            var name = "";
 
-            if (!Program.ForceDefaultMapping && File.Exists(GetMappingPath("CurrentMappingName"))) {
+            if (File.Exists(GetMappingPath("CurrentMappingName"))) {
                 name = File.ReadAllText(GetMappingPath("CurrentMappingName")).Trim();
+            }
+
+            if (!string.IsNullOrEmpty(Program.InitialMappingName)) {
+                name = Program.InitialMappingName;
+            }
+            
+            if (Program.ForceDefaultMapping) {
+                name = DefaultMappingName;
             }
 
             if (!DoesMappingExist(name)) {
