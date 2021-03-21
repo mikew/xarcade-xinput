@@ -48,6 +48,7 @@ jobs:
           path: build
 
       - name: Create archive
+        if: endsWith(github.ref, '/master')
         run: |
           7z a xarcade-xinput.zip ".\build\*"
 
