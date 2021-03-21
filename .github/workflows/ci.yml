@@ -46,6 +46,10 @@ jobs:
           name: build
           path: build
 
+      - name: Create archive
+        run: |
+          zip -r xarcade-xinput.xip build/*
+
       - name: Release
         uses: marvinpinto/action-automatic-releases@latest
         with:
@@ -54,4 +58,4 @@ jobs:
           automatic_release_tag: latest
           title: Release ${{ github.sha }}
           files: |
-            build/**/*
+            xarcade-xinput.zip
