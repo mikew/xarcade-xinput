@@ -48,7 +48,7 @@ jobs:
 
       - name: Create archive
         run: |
-          zip -r xarcade-xinput.xip build/*
+          7z a xarcade-xinput.zip ".\build\*"
 
       - name: Release
         uses: marvinpinto/action-automatic-releases@latest
