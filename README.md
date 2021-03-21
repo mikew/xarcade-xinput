@@ -50,6 +50,18 @@ So, in the example above, `W` would push the left stick forward to 50%, and `S` 
 
 Note that no matter what you have mapped, pressing the equivalent of `RB + Start` will press the `Guide / Home / Logo` button.
 
+## Command Line Arguments
+
+You can pass arguments when running XArcade XInput:
+
+Argument | Purpose
+---|---
+`--debug` | Prints some debug information.
+`--default` | Force using the default mapping. This can help if you get stuck when writing your own mappings. This takes precedence over other arguments.
+`--skip-ui` | Will prevent your browser from opening.
+`--start-disabled` | Won't listen for keyboard events when starting.
+`--mapping`
+
 ## Why
 
 [X-Arcade used to suggest](https://support.xgaming.com/support/solutions/articles/12000003227-use-x-arcade-as-a-windows-joystick-gamepad-controller-xinput-) a number of different methods of getting your joystick to appear as a DirectInput or XInput controller in Windows. What you end up with is:
