@@ -6,6 +6,7 @@
         static public bool IsDebug = false;
         static public bool ForceDefaultMapping = false;
         static public bool ShouldOpenUI = true;
+        static public string InitialMappingName;
         static public bool ShouldStartDisabled = false;
 
         [System.Runtime.InteropServices.DllImport("Kernel32")]
@@ -27,6 +28,11 @@
                 if (args[i] == "--skip-ui") {
                     ShouldOpenUI = false;
                 }
+
+                if (args[i] == "--mapping") {
+                    InitialMappingName = args[i + 1];
+                    i++;
+                }  
 
                 if (args[i] == "--start-disabled") {
                     ShouldStartDisabled = true;
