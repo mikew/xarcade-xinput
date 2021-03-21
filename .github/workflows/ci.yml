@@ -41,14 +41,12 @@ jobs:
 
     steps:
       - name: Download build
-        if: endsWith(github.ref, '/github-actions')
         uses: actions/download-artifact@v2
         with:
           name: build
           path: build
 
       - name: Release
-        if: endsWith(github.ref, '/github-actions')
         uses: softprops/action-gh-release@v1
         with:
           files: |
