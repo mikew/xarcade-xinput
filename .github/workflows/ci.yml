@@ -47,9 +47,11 @@ jobs:
           path: build
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: marvinpinto/action-automatic-releases@latest
         with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          automatic_release_tag: latest
+          title: Release ${{ github.sha }}
           files: |
             build/**/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
