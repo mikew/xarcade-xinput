@@ -207,45 +207,15 @@ namespace XArcade_XInput {
 
                 var shorthand = pair.Value as object[];
                 var controllerIndex = (int)shorthand[0];
-                var controllerKey = (string)shorthand[1];
-                var didMap = false;
+                var programAction = GetActionFromSpec(shorthand);
 
-                switch (controllerKey) {
-                    case "LeftTrigger":
-                    case "RightTrigger":
-                    case "LeftStickX":
-                    case "LeftStickY":
-                    case "RightStickX":
-                    case "RightStickY": {
-                            var maxValue = short.MaxValue;
+                if (programAction != null) {
+                    if (pair.Key.Contains("+")) {
+                        ComboMappings.Add(new Combo(pair.Key, programAction));
+                    } else {
+                        KeyboardMappings[pair.Key] = programAction;
+                    }
 
-                            if (controllerKey == "LeftTrigger" || controllerKey == "RightTrigger") {
-                                maxValue = byte.MaxValue;
-                            }
-
-                            var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
-                            var multipliers = ParseAxisMultipliers(shorthand);
-                            var downMultiplier = multipliers[0];
-                            var upMultiplier = multipliers[1];
-                            var downValue = (int)System.Math.Round(maxValue * downMultiplier);
-                            var upValue = (int)System.Math.Round(0 * upMultiplier);
-
-                            KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
-                            didMap = true;
-
-                            break;
-                        }
-                    default: {
-                            var button = (X360Buttons)System.Enum.Parse(typeof(X360Buttons), controllerKey);
-
-                            KeyboardMappings[pair.Key] = new KeyboardDownToButton { Index = controllerIndex, Button = button };
-                            didMap = true;
-
-                            break;
-                        }
-                }
-
-                if (didMap) {
                     if (!MappedControllerIndexes.Contains(controllerIndex)) {
                         MappedControllerIndexes.Add(controllerIndex);
                     }
@@ -253,6 +223,47 @@ namespace XArcade_XInput {
             }
 
             OnParse?.Invoke(this, new System.EventArgs());
+        }
+
+        IProgramAction GetActionFromSpec(object[] spec) {
+            var controllerIndex = (int)spec[0];
+            var controllerKey = (string)spec[1];
+
+            switch (controllerKey) {
+                case "Restart":
+                case "Disable":
+                case "Enable":
+                case "NextMapping":
+                case "PreviousMapping":
+                    return new SpecialAction { Name = controllerKey };
+
+                case "LeftTrigger":
+                case "RightTrigger":
+                case "LeftStickX":
+                case "LeftStickY":
+                case "RightStickX":
+                case "RightStickY": {
+                    var maxValue = short.MaxValue;
+
+                    if (controllerKey == "LeftTrigger" || controllerKey == "RightTrigger") {
+                        maxValue = byte.MaxValue;
+                    }
+
+                    var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
+                    var multipliers = ParseAxisMultipliers(spec);
+                    var downMultiplier = multipliers[0];
+                    var upMultiplier = multipliers[1];
+                    var downValue = (int)System.Math.Round(maxValue * downMultiplier);
+                    var upValue = (int)System.Math.Round(0 * upMultiplier);
+
+                    return new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
+                }
+                default: {
+                    var button = (X360Buttons)System.Enum.Parse(typeof(X360Buttons), controllerKey);
+
+                    return new KeyboardDownToButton { Index = controllerIndex, Button = button };
+                }
+            }
         }
 
         float[] ParseAxisMultipliers (object[] shorthand) {
@@ -283,9 +294,20 @@ namespace XArcade_XInput {
         }
     }
 
-    class IKeyboardActionToGamepad {
+    class IProgramAction {
+        public virtual void Run(bool IsRelease = false) { }
+    }
+
+    class SpecialAction : IProgramAction {
+        public string Name;
+
+        public override void Run(bool IsRelease = false) {
+            System.Console.WriteLine($"Todo: Implement {Name} in KeyboardMapper (IsRelease: {IsRelease})");
+        }
+    }
+
+    class IKeyboardActionToGamepad : IProgramAction {
         public int Index;
-        public virtual void Run (bool IsRelease = false) { }
     }
 
     class KeyboardDownToButton : IKeyboardActionToGamepad {
