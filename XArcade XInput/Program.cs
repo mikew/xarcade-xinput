@@ -7,6 +7,12 @@
         static public bool ForceDefaultMapping = false;
         static public bool ShouldOpenUI = true;
 
+        [System.Runtime.InteropServices.DllImport("Kernel32")]
+        private static extern bool SetConsoleCtrlHandler(ConsoleCtrlHandler Handler, bool Add);
+
+        private delegate bool ConsoleCtrlHandler(int Signal);
+        private static ConsoleCtrlHandler ConsoleCtrlHandlerRef;
+
         static void Main (string[] args) {
             for (var i = 0; i < args.Length; i++) {
                 if (args[i] == "--debug") {
@@ -39,7 +45,22 @@
 
             // See https://github.com/gmamaladze/globalmousekeyhook/issues/3#issuecomment-230909645
             System.Windows.Forms.ApplicationContext msgLoop = new System.Windows.Forms.ApplicationContext();
+
+            ConsoleCtrlHandlerRef += new ConsoleCtrlHandler(HandleConsoleExit);
+            SetConsoleCtrlHandler(ConsoleCtrlHandlerRef, true);
+
             System.Windows.Forms.Application.Run(msgLoop);
+        }
+
+        private static void Stop() {
+            RestServerInstance.Stop();
+            KeyboardMapperInstance.Stop();
+            ControllerManagerInstance.Stop();
+        }
+
+        private static bool HandleConsoleExit(int Signal) {
+            Stop();
+            return false;
         }
     }
 }
