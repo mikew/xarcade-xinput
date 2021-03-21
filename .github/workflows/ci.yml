@@ -22,7 +22,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
 
     - name: build
-      run: ./script/build
+      run: script\build.bat
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
