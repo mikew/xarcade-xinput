@@ -2,20 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Gma.System.MouseKeyHook;
 
 namespace XArcade_XInput {
     class KeyboardMapper {
         public bool IsRunning = false;
         public List<int> MappedControllerIndexes = new List<int>();
-        Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
-        Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
+        readonly Dictionary<string, IProgramAction> KeyboardMappings = new Dictionary<string, IProgramAction>();
+        private readonly List<Combo> ComboMappings = new List<Combo>();
+        static readonly List<string> keysDown = new List<string>();
+        private readonly Dictionary<string, Combo> runningCombos = new Dictionary<string, Combo>();
+        private readonly IKeyboardMouseEvents KeyboardHook;
         public event System.EventHandler OnParse;
 
         public string CurrentMappingName;
-        string DefaultMappingName = "X-Arcade 2 Player Analog";
+        private readonly string DefaultMappingName = "X-Arcade 2 Player Analog";
 
         public KeyboardMapper () {
-            KeyboardHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
+            KeyboardHook = Hook.GlobalEvents();
 
             LoadPreviousMapping();
         }
@@ -160,38 +164,97 @@ namespace XArcade_XInput {
             return ret;
         }
 
-        static List<System.Windows.Forms.Keys> keysDown = new List<System.Windows.Forms.Keys>();
+
+        bool RunKeyDownAction(string keyCodeString) {
+            if (KeyboardMappings.ContainsKey(keyCodeString)) {
+                KeyboardMappings[keyCodeString].Run();
+                return true;
+            }
+
+            return false;
+        }
+
+        bool RunKeyUpAction(string keyCodeString) {
+            if (KeyboardMappings.ContainsKey(keyCodeString)) {
+                KeyboardMappings[keyCodeString].Run(true);
+                return true;
+            }
+
+            return false;
+        }
 
         void KeyboardHook_KeyDown (object sender, System.Windows.Forms.KeyEventArgs e) {
-            if (KeyboardMappings.ContainsKey(e.KeyCode.ToString())) {
-                KeyboardMappings[e.KeyCode.ToString()].Run();
-                e.Handled = true;
+            var keyCodeString = e.KeyCode.ToString();
+            if (!keysDown.Contains(keyCodeString)) {
+                keysDown.Add(keyCodeString);
+            }
+            var wasHandledByCombo = false;
+            var isCurrentKeyOutsideOfCombo = false;
+
+            foreach (var combo in ComboMappings) {
+                if (combo.IsValidWith(keysDown)) {
+                    wasHandledByCombo = true;
+
+                    if (!runningCombos.ContainsKey(combo.Name)) {
+                        runningCombos.Add(combo.Name, combo);
+
+                        // Simulate key up for anything that may have been down.
+                        foreach (var keyCodeStringToRemove in combo.Keys) {
+                            RunKeyUpAction(keyCodeStringToRemove);
+                        }
+
+                        // Run combo after any keyups.
+                        combo.ProgramAction.Run();
+                    }
+
+                    isCurrentKeyOutsideOfCombo = !combo.Keys.Contains(keyCodeString);
+                    e.Handled = true;
+                }
+            }
+
+            if (!wasHandledByCombo || isCurrentKeyOutsideOfCombo) {
+                e.Handled = RunKeyDownAction(keyCodeString);
             }
 
             if (Program.IsDebug) {
-                if (!keysDown.Contains(e.KeyCode)) {
-                    keysDown.Add(e.KeyCode);
-                    var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
-                    System.Console.WriteLine($"Keyboard: {message}");
-                }
+                var message = string.Join(" + ", keysDown);
+                System.Console.WriteLine($"Keyboard: {message}");
             }
         }
 
         void KeyboardHook_KeyUp (object sender, System.Windows.Forms.KeyEventArgs e) {
-            if (KeyboardMappings.ContainsKey(e.KeyCode.ToString())) {
-                KeyboardMappings[e.KeyCode.ToString()].Run(true);
-                e.Handled = true;
+            var keyCodeString = e.KeyCode.ToString();
+            if (keysDown.Contains(keyCodeString)) {
+                keysDown.Remove(keyCodeString);
+            }
+            e.Handled = RunKeyUpAction(keyCodeString);
+
+            // Invalidate previuos combos.
+            var toRemove = new List<string>();
+            foreach (var pair in runningCombos) {
+                if (!pair.Value.IsValidWith(keysDown)) {
+                    pair.Value.ProgramAction.Run(true);
+                    toRemove.Add(pair.Key);
+                    e.Handled = true;
+                    // Simulate key down for other keys in the combo that may still be down.
+                    //foreach (var keyCodeStringToAdd in pair.Value.Keys) {
+                    //    if (keysDown.Contains(keyCodeStringToAdd)) {
+                    //        RunKeyDownAction(keyCodeStringToAdd);
+                    //    }
+                    //}
+                    //runningCombos.Remove(p);
+                }
+            }
+            foreach (var name in toRemove) {
+                runningCombos.Remove(name);
             }
 
             if (Program.IsDebug) {
-                if (keysDown.Contains(e.KeyCode)) {
-                    keysDown.Remove(e.KeyCode);
-                    var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
-                    if (string.IsNullOrEmpty(message)) {
-                        message = "All keys released";
-                    }
-                    System.Console.WriteLine($"Keyboard: {message}");
+                var message = string.Join(" + ", keysDown);
+                if (string.IsNullOrEmpty(message)) {
+                    message = "All keys released";
                 }
+                System.Console.WriteLine($"Keyboard: {message}");
             }
         }
 
@@ -335,6 +398,25 @@ namespace XArcade_XInput {
             }
 
             Program.ControllerManagerInstance.SetAxis(Index, Axis, DownValue);
+        }
+    }
+
+    class Combo {
+        public string[] Keys { get; }
+        public string Name;
+        public int Priority { get; }
+        public IProgramAction ProgramAction;
+
+        public Combo(string name, IProgramAction programAction) {
+            Name = name;
+            ProgramAction = programAction;
+
+            Keys = Name.Split('+');
+            Priority = Keys.Length;
+        }
+
+        public bool IsValidWith(List<string> keys) {
+            return Keys.All((keyCodeString) => keys.Contains(keyCodeString));
         }
     }
 }
