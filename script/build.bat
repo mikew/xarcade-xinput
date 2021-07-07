@@ -3,8 +3,8 @@
 REM Build webapp
 rd /S /Q webapp\build\
 pushd webapp\
-call yarn install
-call yarn run build
+call npm install
+call node_modules\.bin\react-scripts-ts build
 popd
 
 REM Grab Scp Driver Installer

@@ -1,0 +1,34 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome",
+      "sourceMaps": true,
+      "port": 9241,
+      "showAsyncStacks": true,
+      "url": "http://localhost:3000"
+    },
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "Attach to Chrome",
+      "sourceMaps": true,
+      "port": 9241,
+      "showAsyncStacks": true
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attch to Tests (:9243)",
+      "restart": true,
+      "sourceMaps": true,
+      "showAsyncStacks": true,
+      "port": 9243
+    }
+  ]
+}

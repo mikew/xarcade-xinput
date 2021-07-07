@@ -42,7 +42,8 @@ namespace XArcade_XInput {
         }
 
         static public void SetCORSHeaders (IHttpContext ctx) {
-            ctx.Response.Headers["Access-Control-Allow-Origin"] = "*";
+            ctx.Response.AddHeader("Access-Control-Allow-Origin", "*");
+            ctx.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With");
         }
 
         static public void SendTextResponse (IHttpContext ctx, string response) {
@@ -67,6 +68,21 @@ namespace XArcade_XInput {
 
     [RestResource]
     class DefaultRestResource {
+        [RestRoute(HttpMethod = HttpMethod.OPTIONS, PathInfo = @"^.*?$")]
+        public IHttpContext CorsOptions(IHttpContext ctx) {
+            var validMethods = new HttpMethod[] {
+                HttpMethod.GET,
+                HttpMethod.POST,
+                HttpMethod.DELETE,
+                HttpMethod.OPTIONS,
+            };
+            ctx.Response.Headers["Access-Control-Allow-Methods"] = string.Join(", ", validMethods.Select(x => x.ToString()));
+
+            RestServer.SetCORSHeaders(ctx);
+            RestServer.CloseResponse(ctx);
+            return ctx;
+        }
+
         [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/")]
         public IHttpContext Index (IHttpContext ctx) {
             string prefix = ctx.Server.PublicFolder.Prefix;
@@ -159,19 +175,6 @@ namespace XArcade_XInput {
             return ctx;
         }
 
-        [RestRoute(HttpMethod = HttpMethod.OPTIONS, PathInfo = "/api/keyboard/mapping")]
-        public IHttpContext KeyboardMappingOptions (IHttpContext ctx) {
-            var validMethods = new HttpMethod[] {
-                HttpMethod.GET,
-                HttpMethod.POST,
-                HttpMethod.DELETE,
-                HttpMethod.OPTIONS,
-            };
-            ctx.Response.Headers["Access-Control-Allow-Methods"] = string.Join(", ", validMethods.Select(x => x.ToString()));
-            RestServer.SetCORSHeaders(ctx);
-            RestServer.CloseResponse(ctx);
-            return ctx;
-        }
 
         [RestRoute(HttpMethod = HttpMethod.DELETE, PathInfo = "/api/keyboard/mapping")]
         public IHttpContext KeyboardDeleteMapping (IHttpContext ctx) {

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -ex
+
+./script/install-deps
+exec ./node_modules/.bin/react-scripts-ts \
+  --inspect=9243 \
+  test \
+  --env=jsdom \
+  --runInBand \
+  --verbose

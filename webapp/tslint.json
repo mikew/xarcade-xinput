@@ -1,0 +1,13 @@
+{
+  "defaultSeverity": "warning",
+  "extends": [
+    "tslint-config-sst"
+  ],
+  "jsRules": {},
+  "rulesDirectory": [],
+  "rules": {
+    "no-var-requires": false,
+    "align": false,
+    "strict-boolean-expressions": false
+  }
+}

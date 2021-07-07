@@ -1,0 +1,186 @@
+swagger: '2.0'
+
+info:
+  version: '1.0.0'
+  title: XArcade XInput Rest API
+
+host: 10.0.1.2:32123
+schemes:
+- http
+basePath: /api
+consumes:
+  - application/json
+
+tags:
+- name: keyboard
+  description: Keyboard mapping and service
+- name: controller
+  description: Add / remove fake controllers
+
+paths:
+  /keyboard/start:
+    post:
+      summary: Start watching keyboard for input
+      tags:
+      - keyboard
+      consumes:
+      - application/json
+      responses:
+        200:
+          description: Ok
+
+  /keyboard/stop:
+    post:
+      summary: Stop watching keyboard for input
+      tags:
+      - keyboard
+      responses:
+        200:
+          description: Ok
+
+  /keyboard/mapping:
+    get:
+      tags:
+      - keyboard
+      summary: Get keyboard mapping list and status
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: object
+            properties:
+              currentMapping:
+                type: string
+              mappings:
+                type: object
+                additionalProperties:
+                  type: string
+                example:
+                  Mapping 1: '{ "Space": [0, "A"] }'
+                  Mapping 2: '{ "Space": [0, "X"] }'
+
+    post:
+      summary: Update a mapping
+      tags:
+      - keyboard
+      parameters:
+      - name: body
+        in: body
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Mapping name
+            mapping:
+              type: string
+              description: JSON contents of mapping
+      responses:
+        200:
+          description: Ok
+        500:
+          description: Error
+          schema:
+            $ref: '#/definitions/BasicError'
+
+    delete:
+      summary: Delete a mapping
+      tags:
+      - keyboard
+      parameters:
+      - name: body
+        in: body
+        schema:
+          type: string
+          description: Name of mapping to delete
+      responses:
+        200:
+          description: Ok
+        500:
+          description: Error
+          schema:
+            $ref: '#/definitions/BasicError'
+
+  /keyboard/mapping/current:
+    post:
+      summary: Change mapping
+      tags:
+      - keyboard
+      parameters:
+      - name: body
+        in: body
+        schema:
+          type: string
+          description: Name of mapping to switch to
+      responses:
+        200:
+          description: Ok
+        500:
+          description: Error
+          schema:
+            $ref: '#/definitions/BasicError'
+
+  /keyboard/mapping/rename:
+    post:
+      summary: Rename a mapping
+      tags:
+      - keyboard
+      parameters:
+      - name: body
+        in: body
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            newName:
+              type: string
+      responses:
+        200:
+          description: Ok
+        500:
+          description: Error
+          schema:
+            $ref: '#/definitions/BasicError'
+
+  /controller/start:
+    post:
+      summary: Add fake controllers
+      tags:
+      - controller
+      responses:
+        200:
+          description: Ok
+
+  /controller/stop:
+    post:
+      summary: Remove fake controllers
+      tags:
+      - controller
+      responses:
+        200:
+          description: Ok
+
+  /status:
+    get:
+      summary: Get running status
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: object
+            properties:
+              isControllerRunning:
+                type: boolean
+              isKeyboardRunning:
+                type: boolean
+              hostname:
+                type: string
+
+definitions:
+  BasicError:
+    type: object
+    properties:
+      error:
+        type: string
+        description: Error message
