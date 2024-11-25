@@ -60,7 +60,7 @@ Argument | Purpose
 `--default` | Force using the default mapping. This can help if you get stuck when writing your own mappings. This takes precedence over other arguments.
 `--skip-ui` | Will prevent your browser from opening.
 `--start-disabled` | Won't listen for keyboard events when starting.
-`--mapping`
+`--mapping` | Name of mapping, as seen in app, to load instead of the previous. Helps when different games require different configurations.
 
 ## Why
 
