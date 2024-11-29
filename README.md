@@ -11,7 +11,7 @@ Technically, turns any keyboard input into 360 Controllers, but the default is t
 1. [Download the latest release](https://github.com/mikew/xarcade-xinput/releases/latest)
 1. Double-click `Install Driver.exe`.
 1. Run `XArcade XInput.exe`
-1. [Test in the HTML5 Gamepad Tester](http://html5gamepad.com/)
+1. [Test in the HTML5 Gamepad Tester](https://greggman.github.io/html5-gamepad-test/)
 
 ## Manual Installation
 1. [Download the latest release](https://github.com/mikew/xarcade-xinput/releases/latest)
@@ -22,7 +22,7 @@ Technically, turns any keyboard input into 360 Controllers, but the default is t
     netsh http add urlacl url=http://+:32123/ user=Everyone
     ```
 1. Run `XArcade XInput.exe`
-1. [Test in the HTML5 Gamepad Tester](http://html5gamepad.com/)
+1. [Test in the HTML5 Gamepad Tester](https://greggman.github.io/html5-gamepad-test/)
 
 ## Usage
 
