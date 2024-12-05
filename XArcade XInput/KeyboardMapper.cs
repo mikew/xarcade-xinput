@@ -2,20 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Gma.System.MouseKeyHook;
 
 namespace XArcade_XInput {
     class KeyboardMapper {
         public bool IsRunning = false;
         public List<int> MappedControllerIndexes = new List<int>();
-        Dictionary<string, IKeyboardActionToGamepad> KeyboardMappings = new Dictionary<string, IKeyboardActionToGamepad>();
-        Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardHook;
+        readonly Dictionary<string, IProgramAction> KeyboardMappings = new Dictionary<string, IProgramAction>();
+        private readonly List<Combo> ComboMappings = new List<Combo>();
+        static readonly List<string> keysDown = new List<string>();
+        private readonly Dictionary<string, Combo> runningCombos = new Dictionary<string, Combo>();
+        private readonly IKeyboardMouseEvents KeyboardHook;
         public event System.EventHandler OnParse;
 
         public string CurrentMappingName;
-        string DefaultMappingName = "X-Arcade 2 Player Analog";
+        private readonly string DefaultMappingName = "X-Arcade 2 Player Analog";
 
         public KeyboardMapper () {
-            KeyboardHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
+            KeyboardHook = Hook.GlobalEvents();
 
             LoadPreviousMapping();
         }
@@ -28,6 +32,8 @@ namespace XArcade_XInput {
             IsRunning = true;
             KeyboardHook.KeyDown += KeyboardHook_KeyDown;
             KeyboardHook.KeyUp += KeyboardHook_KeyUp;
+            KeyboardHook.MouseDownExt += KeyboardHook_MouseDown;
+            KeyboardHook.MouseUpExt += KeyboardHook_MouseUp;
             System.Console.WriteLine("Started KeyboardMapper");
         }
 
@@ -35,6 +41,8 @@ namespace XArcade_XInput {
             IsRunning = false;
             KeyboardHook.KeyDown -= KeyboardHook_KeyDown;
             KeyboardHook.KeyUp -= KeyboardHook_KeyUp;
+            KeyboardHook.MouseDownExt -= KeyboardHook_MouseDown;
+            KeyboardHook.MouseUpExt -= KeyboardHook_MouseUp;
             System.Console.WriteLine("Stopped KeyboardMapper");
         }
 
@@ -160,39 +168,140 @@ namespace XArcade_XInput {
             return ret;
         }
 
-        static List<System.Windows.Forms.Keys> keysDown = new List<System.Windows.Forms.Keys>();
 
-        void KeyboardHook_KeyDown (object sender, System.Windows.Forms.KeyEventArgs e) {
-            if (KeyboardMappings.ContainsKey(e.KeyCode.ToString())) {
-                KeyboardMappings[e.KeyCode.ToString()].Run();
-                e.Handled = true;
+        bool RunKeyDownAction(string keyCodeString) {
+            if (KeyboardMappings.ContainsKey(keyCodeString)) {
+                KeyboardMappings[keyCodeString].Run();
+                return true;
             }
 
-            if (Program.IsDebug) {
-                if (!keysDown.Contains(e.KeyCode)) {
-                    keysDown.Add(e.KeyCode);
-                    var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
-                    System.Console.WriteLine($"Keyboard: {message}");
-                }
-            }
+            return false;
         }
 
-        void KeyboardHook_KeyUp (object sender, System.Windows.Forms.KeyEventArgs e) {
-            if (KeyboardMappings.ContainsKey(e.KeyCode.ToString())) {
-                KeyboardMappings[e.KeyCode.ToString()].Run(true);
-                e.Handled = true;
+        bool RunKeyUpAction(string keyCodeString) {
+            if (KeyboardMappings.ContainsKey(keyCodeString)) {
+                KeyboardMappings[keyCodeString].Run(true);
+                return true;
+            }
+
+            return false;
+        }
+
+        void KeyboardHook_MouseDown(object sender, MouseEventExtArgs e) {
+            e.Handled = HandleKeyOrMouseDown(GetKeyNameFromMouseButton(e.Button.ToString()));
+        }
+
+        void KeyboardHook_MouseUp(object sender, MouseEventExtArgs e) {
+            e.Handled = HandleKeyOrMouseUp(GetKeyNameFromMouseButton(e.Button.ToString()));
+        }
+
+        string GetKeyNameFromMouseButton(string button) {
+            switch (button) {
+                case "Left":
+                    return "LButton";
+                case "Right":
+                    return "RButton";
+                case "Middle":
+                    return "MButton";
+            }
+
+            return button;
+        }
+
+        void KeyboardHook_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e) {
+            e.Handled = HandleKeyOrMouseDown(e.KeyCode.ToString());
+        }
+
+        bool HandleKeyOrMouseDown (string keyCodeString) {
+            if (keyCodeString == "None") {
+                return false;
+            }
+
+            if (!keysDown.Contains(keyCodeString)) {
+                keysDown.Add(keyCodeString);
+            }
+
+            var wasHandledByCombo = false;
+            var isCurrentKeyOutsideOfCombo = false;
+            var wasHandled = false;
+
+            foreach (var combo in ComboMappings) {
+                if (combo.IsValidWith(keysDown)) {
+                    wasHandledByCombo = true;
+
+                    if (!runningCombos.ContainsKey(combo.Name)) {
+                        runningCombos.Add(combo.Name, combo);
+
+                        // Simulate key up for anything that may have been down.
+                        foreach (var keyCodeStringToRemove in combo.Keys) {
+                            RunKeyUpAction(keyCodeStringToRemove);
+                        }
+
+                        // Run combo after any keyups.
+                        combo.ProgramAction.Run();
+                    }
+
+                    isCurrentKeyOutsideOfCombo = !combo.Keys.Contains(keyCodeString);
+                    wasHandled = true;
+                }
+            }
+
+            if (!wasHandledByCombo || isCurrentKeyOutsideOfCombo) {
+                wasHandled = RunKeyDownAction(keyCodeString);
             }
 
             if (Program.IsDebug) {
-                if (keysDown.Contains(e.KeyCode)) {
-                    keysDown.Remove(e.KeyCode);
-                    var message = string.Join(" + ", keysDown.Select(x => x.ToString()));
-                    if (string.IsNullOrEmpty(message)) {
-                        message = "All keys released";
-                    }
-                    System.Console.WriteLine($"Keyboard: {message}");
+                var message = string.Join(" + ", keysDown);
+                System.Console.WriteLine($"Keyboard: {message}");
+            }
+
+            return wasHandled;
+        }
+
+        void KeyboardHook_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e) {
+            e.Handled = HandleKeyOrMouseUp(e.KeyCode.ToString());
+        }
+
+        bool HandleKeyOrMouseUp(string keyCodeString) {
+            if (keyCodeString == "None") {
+                return false;
+            }
+
+            if (keysDown.Contains(keyCodeString)) {
+                keysDown.Remove(keyCodeString);
+            }
+
+            bool wasHandled = RunKeyUpAction(keyCodeString);
+
+            // Invalidate previuos combos.
+            var toRemove = new List<string>();
+            foreach (var pair in runningCombos) {
+                if (!pair.Value.IsValidWith(keysDown)) {
+                    pair.Value.ProgramAction.Run(true);
+                    toRemove.Add(pair.Key);
+                    wasHandled = true;
+                    // Simulate key down for other keys in the combo that may still be down.
+                    //foreach (var keyCodeStringToAdd in pair.Value.Keys) {
+                    //    if (keysDown.Contains(keyCodeStringToAdd)) {
+                    //        RunKeyDownAction(keyCodeStringToAdd);
+                    //    }
+                    //}
+                    //runningCombos.Remove(p);
                 }
             }
+            foreach (var name in toRemove) {
+                runningCombos.Remove(name);
+            }
+
+            if (Program.IsDebug) {
+                var message = string.Join(" + ", keysDown);
+                if (string.IsNullOrEmpty(message)) {
+                    message = "All keys released";
+                }
+                System.Console.WriteLine($"Keyboard: {message}");
+            }
+
+            return wasHandled;
         }
 
         public void ParseMapping (string mappingJsonContents) {
@@ -207,45 +316,15 @@ namespace XArcade_XInput {
 
                 var shorthand = pair.Value as object[];
                 var controllerIndex = (int)shorthand[0];
-                var controllerKey = (string)shorthand[1];
-                var didMap = false;
+                var programAction = GetActionFromSpec(shorthand);
 
-                switch (controllerKey) {
-                    case "LeftTrigger":
-                    case "RightTrigger":
-                    case "LeftStickX":
-                    case "LeftStickY":
-                    case "RightStickX":
-                    case "RightStickY": {
-                            var maxValue = short.MaxValue;
+                if (programAction != null) {
+                    if (pair.Key.Contains("+")) {
+                        ComboMappings.Add(new Combo(pair.Key, programAction));
+                    } else {
+                        KeyboardMappings[pair.Key] = programAction;
+                    }
 
-                            if (controllerKey == "LeftTrigger" || controllerKey == "RightTrigger") {
-                                maxValue = byte.MaxValue;
-                            }
-
-                            var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
-                            var multipliers = ParseAxisMultipliers(shorthand);
-                            var downMultiplier = multipliers[0];
-                            var upMultiplier = multipliers[1];
-                            var downValue = (int)System.Math.Round(maxValue * downMultiplier);
-                            var upValue = (int)System.Math.Round(0 * upMultiplier);
-
-                            KeyboardMappings[pair.Key] = new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
-                            didMap = true;
-
-                            break;
-                        }
-                    default: {
-                            var button = (X360Buttons)System.Enum.Parse(typeof(X360Buttons), controllerKey);
-
-                            KeyboardMappings[pair.Key] = new KeyboardDownToButton { Index = controllerIndex, Button = button };
-                            didMap = true;
-
-                            break;
-                        }
-                }
-
-                if (didMap) {
                     if (!MappedControllerIndexes.Contains(controllerIndex)) {
                         MappedControllerIndexes.Add(controllerIndex);
                     }
@@ -253,6 +332,47 @@ namespace XArcade_XInput {
             }
 
             OnParse?.Invoke(this, new System.EventArgs());
+        }
+
+        IProgramAction GetActionFromSpec(object[] spec) {
+            var controllerIndex = (int)spec[0];
+            var controllerKey = (string)spec[1];
+
+            switch (controllerKey) {
+                case "Restart":
+                case "Disable":
+                case "Enable":
+                case "NextMapping":
+                case "PreviousMapping":
+                    return new SpecialAction { Name = controllerKey };
+
+                case "LeftTrigger":
+                case "RightTrigger":
+                case "LeftStickX":
+                case "LeftStickY":
+                case "RightStickX":
+                case "RightStickY": {
+                    var maxValue = short.MaxValue;
+
+                    if (controllerKey == "LeftTrigger" || controllerKey == "RightTrigger") {
+                        maxValue = byte.MaxValue;
+                    }
+
+                    var axis = (X360Axis)System.Enum.Parse(typeof(X360Axis), controllerKey);
+                    var multipliers = ParseAxisMultipliers(spec);
+                    var downMultiplier = multipliers[0];
+                    var upMultiplier = multipliers[1];
+                    var downValue = (int)System.Math.Round(maxValue * downMultiplier);
+                    var upValue = (int)System.Math.Round(0 * upMultiplier);
+
+                    return new KeyboardDownToAxis { DownValue = downValue, UpValue = upValue, Index = controllerIndex, Axis = axis };
+                }
+                default: {
+                    var button = (X360Buttons)System.Enum.Parse(typeof(X360Buttons), controllerKey);
+
+                    return new KeyboardDownToButton { Index = controllerIndex, Button = button };
+                }
+            }
         }
 
         float[] ParseAxisMultipliers (object[] shorthand) {
@@ -283,9 +403,20 @@ namespace XArcade_XInput {
         }
     }
 
-    class IKeyboardActionToGamepad {
+    class IProgramAction {
+        public virtual void Run(bool IsRelease = false) { }
+    }
+
+    class SpecialAction : IProgramAction {
+        public string Name;
+
+        public override void Run(bool IsRelease = false) {
+            System.Console.WriteLine($"Todo: Implement {Name} in KeyboardMapper (IsRelease: {IsRelease})");
+        }
+    }
+
+    class IKeyboardActionToGamepad : IProgramAction {
         public int Index;
-        public virtual void Run (bool IsRelease = false) { }
     }
 
     class KeyboardDownToButton : IKeyboardActionToGamepad {
@@ -313,6 +444,25 @@ namespace XArcade_XInput {
             }
 
             Program.ControllerManagerInstance.SetAxis(Index, Axis, DownValue);
+        }
+    }
+
+    class Combo {
+        public string[] Keys { get; }
+        public string Name;
+        public int Priority { get; }
+        public IProgramAction ProgramAction;
+
+        public Combo(string name, IProgramAction programAction) {
+            Name = name;
+            ProgramAction = programAction;
+
+            Keys = Name.Split('+');
+            Priority = Keys.Length;
+        }
+
+        public bool IsValidWith(List<string> keys) {
+            return Keys.All((keyCodeString) => keys.Contains(keyCodeString));
         }
     }
 }
