@@ -1,6 +1,6 @@
 # X-Arcade XInput
 
-[![][appveyor badge]][appveyor]
+[![][ci badge]][ci link]
 
 Turns an X-Arcade joystick into 360 Controllers.
 
@@ -14,13 +14,14 @@ Technically, turns any keyboard input into 360 Controllers, but the default is t
 1. [Test in the HTML5 Gamepad Tester](https://greggman.github.io/html5-gamepad-test/)
 
 ## Manual Installation
+
 1. [Download the latest release](https://github.com/mikew/xarcade-xinput/releases/latest)
 1. Run `Scp Driver Installer\ScpDriverInstaller.exe` and press `Install`
 1. Run in Admin Command Prompt:
-    ```dos
-    netsh advfirewall firewall add rule name="XArcade XInput" dir=in action=allow protocol=TCP localport=32123
-    netsh http add urlacl url=http://+:32123/ user=Everyone
-    ```
+   ```dos
+   netsh advfirewall firewall add rule name="XArcade XInput" dir=in action=allow protocol=TCP localport=32123
+   netsh http add urlacl url=http://+:32123/ user=Everyone
+   ```
 1. Run `XArcade XInput.exe`
 1. [Test in the HTML5 Gamepad Tester](https://greggman.github.io/html5-gamepad-test/)
 
@@ -36,13 +37,13 @@ You can change any keyboard key to output any single 360 Controller Button or Ax
 
 ```json
 {
-    "W": [0, "LeftStickY", 0.5, 0],
-    "S": [0, "LeftStickY", -1],
-    "E": [0, "X"]
+  "W": [0, "LeftStickY", 0.5, 0],
+  "S": [0, "LeftStickY", -1],
+  "E": [0, "X"]
 }
 ```
 
-The syntax is JSON, where the key on the left is one of [System.Windows.Forms.Keys](https://msdn.microsoft.com/en-us/library/system.windows.forms.keys(v=vs.110).aspx#Anchor_1), and the value is an array of `[controllerIndex, controllerButtonOrAxis, ...parameters]`
+The syntax is JSON, where the key on the left is one of [System.Windows.Forms.Keys](<https://msdn.microsoft.com/en-us/library/system.windows.forms.keys(v=vs.110).aspx#Anchor_1>), and the value is an array of `[controllerIndex, controllerButtonOrAxis, ...parameters]`
 
 If given an axis, like `LeftStickX` or `RightTrigger`, you can supply up to two more parameters: The first being the percentage when the key is down, and the second being the percentage when the key is released.
 
@@ -54,13 +55,13 @@ Note that no matter what you have mapped, pressing the equivalent of `RB + Start
 
 You can pass arguments when running XArcade XInput:
 
-Argument | Purpose
----|---
-`--debug` | Prints some debug information.
-`--default` | Force using the default mapping. This can help if you get stuck when writing your own mappings. This takes precedence over other arguments.
-`--skip-ui` | Will prevent your browser from opening.
-`--start-disabled` | Won't listen for keyboard events when starting.
-`--mapping` | Name of mapping, as seen in app, to load instead of the previous. Helps when different games require different configurations.
+| Argument           | Purpose                                                                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--debug`          | Prints some debug information.                                                                                                              |
+| `--default`        | Force using the default mapping. This can help if you get stuck when writing your own mappings. This takes precedence over other arguments. |
+| `--skip-ui`        | Will prevent your browser from opening.                                                                                                     |
+| `--start-disabled` | Won't listen for keyboard events when starting.                                                                                             |
+| `--mapping`        | Name of mapping, as seen in app, to load instead of the previous. Helps when different games require different configurations.              |
 
 ## Why
 
@@ -78,5 +79,5 @@ Or you can search the internet, and find any combinations like:
 
 That's a lot of indirection. There's none of that here. Just Keyboard to XInput.
 
-[appveyor]: https://ci.appveyor.com/project/mikew/xarcade-xinput
-[appveyor badge]: https://ci.appveyor.com/api/projects/status/github/mikew/xarcade-xinput?svg=true&branch=master
+[appveyor]: https://github.com/mikew/xarcade-xinput/actions
+[appveyor badge]: https://github.com/mikew/xarcade-xinput/actions/workflows/ci.yml/badge.svg?branch=master
