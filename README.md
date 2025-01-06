@@ -79,5 +79,5 @@ Or you can search the internet, and find any combinations like:
 
 That's a lot of indirection. There's none of that here. Just Keyboard to XInput.
 
-[appveyor]: https://github.com/mikew/xarcade-xinput/actions
-[appveyor badge]: https://github.com/mikew/xarcade-xinput/actions/workflows/ci.yml/badge.svg?branch=master
+[ci link]: https://github.com/mikew/xarcade-xinput/actions
+[ci badge]: https://github.com/mikew/xarcade-xinput/actions/workflows/ci.yml/badge.svg?branch=master
